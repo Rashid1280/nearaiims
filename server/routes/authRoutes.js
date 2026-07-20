@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { requireAuth } = require('../middleware/auth'); 
 
 const router = express.Router();
 
@@ -48,13 +49,28 @@ router.post('/login', async (req, res) => {
       expiresIn: '7d',
     });
 
+res.cookie('token', token, {
+  httpOnly : true,
+  secure : process.env.NODE_ENV === 'production',
+  sameSite : 'lax',
+  maxAge : 7 * 24 * 60 * 60 * 1000,
+})
+
     res.status(200).json({
-      token,
       user: { id: user._id, name: user.name, email: user.email },
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+});
+
+
+router.get('/me', requireAuth, async (req, res) => {
+  res.status(200).json({
+    id: req.user._id,
+    name: req.user.name,
+    email: req.user.email,
+  });
 });
 
 module.exports = router;
