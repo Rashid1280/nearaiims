@@ -9,12 +9,14 @@ const router = express.Router();
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
-
+    
+    // check for a duplicate first so we can return a clean, specific message instead of letting MongoDB throw its own duplicate-key error
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(409).json({ message: 'An account with that email already exists' });
     }
 
+    // 10 salt rounds - increase in rounds also increase security but speed gets slower
     const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await User.create({ name, email, passwordHash, phone });
@@ -49,6 +51,7 @@ router.post('/login', async (req, res) => {
       expiresIn: '7d',
     });
 
+    // httpOnly = frontend JS can never read this cookie,only browser can.
 res.cookie('token', token, {
   httpOnly : true,
   secure : process.env.NODE_ENV === 'production',
@@ -66,6 +69,9 @@ res.cookie('token', token, {
 
 
 router.get('/me', requireAuth, async (req, res) => {
+
+    // requireAuth already found the user and attached it to req.user -
+  // nothing left to do here 
   res.status(200).json({
     id: req.user._id,
     name: req.user.name,
