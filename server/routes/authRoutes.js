@@ -6,6 +6,7 @@ const { requireAuth } = require('../middleware/auth');
 
 const router = express.Router();
 
+//REGISTER A USER
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password, phone } = req.body;
@@ -32,7 +33,7 @@ router.post('/register', async (req, res) => {
 });
 
 
-
+//LOGIN A USER
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,7 +52,7 @@ router.post('/login', async (req, res) => {
       expiresIn: '7d',
     });
 
-    // httpOnly = frontend JS can never read this cookie,only browser can.
+// httpOnly = frontend JS can never read this cookie,only browser can.
 res.cookie('token', token, {
   httpOnly : true,
   secure : process.env.NODE_ENV === 'production',
@@ -67,10 +68,10 @@ res.cookie('token', token, {
   }
 });
 
-
+//DASHBOARD AFTER LOGIN
 router.get('/me', requireAuth, async (req, res) => {
 
-    // requireAuth already found the user and attached it to req.user -
+  // requireAuth already found the user and attached it to req.user -
   // nothing left to do here 
   res.status(200).json({
     id: req.user._id,
