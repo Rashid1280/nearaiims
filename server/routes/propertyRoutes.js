@@ -1,14 +1,22 @@
 const express = require('express');
 const Property = require('../models/Property');
 const { requireAuth } = require('../middleware/auth');
+const upload = require('../middleware/upload');
 
 const router = express.Router();
 
 // CREATE — must be logged in
-router.post('/', requireAuth, async (req, res) => {
+router.post('/', requireAuth, upload.array('images', 6), async (req, res) => {
   try {
+
+    if(!req.files || req.files.length ===0){
+     return res.status(400).json({message : 'At least one image is required'})
+    }
+    const images = req.files.map((file)=> `/uploads/${file.filename}` );
+    
     const property = await Property.create({
       ...req.body,
+      images,
       owner: req.user._id,
     });
     res.status(201).json(property);
@@ -41,8 +49,9 @@ router.get('/:id', async (req, res) => {
 });
 
 // UPDATE — must be logged in AND must own this specific property
-router.put('/:id', requireAuth, async (req, res) => {
+router.put('/:id', requireAuth, upload.array('images', 6), async (req, res) => {
   try {
+
     const property = await Property.findById(req.params.id);
     if (!property) {
       return res.status(404).json({ message: 'Property not found' });
@@ -51,7 +60,13 @@ router.put('/:id', requireAuth, async (req, res) => {
       return res.status(403).json({ message: 'You can only edit your own listings' });
     }
 
-    Object.assign(property, req.body);
+      if(!req.files || req.files.length ===0){
+     return res.status(400).json({message : 'At least one image is required'})
+    }
+
+    const images = req.files.map((file)=> `/uploads/${file.filename}` );
+
+    Object.assign(property, req.body, {images});
     await property.save();
     res.status(200).json(property);
   } catch (error) {
