@@ -21,6 +21,12 @@ router.post('/', requireAuth, upload.array('images', 6), async (req, res) => {
     });
     res.status(201).json(property);
   } catch (error) {
+
+    // Mongoose validation failures (bad enum, missing required field, etc)
+    // are the client's fault — changing respond status to 400, not 500
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ message: error.message });
   }
 });
@@ -28,7 +34,26 @@ router.post('/', requireAuth, upload.array('images', 6), async (req, res) => {
 // READ — all properties, public, no login needed
 router.get('/', async (req, res) => {
   try {
-    const properties = await Property.find({ isAvailable: true });
+
+    const {location, propertyType, minPrice, maxPrice} = req.query;
+
+    // filter object - late query parameters will also be added as key vaule pairs
+    const filter = {isAvailable : true};
+
+    // partial, case-insensitive location match
+    if(location){
+      filter.location = {$regex : location, $options : 'i'}
+    }
+    if(propertyType){
+      filter.propertyType = propertyType;
+    }
+    if(minPrice || maxPrice){
+      filter.price = {};
+      if(minPrice) filter.price.$gte = Number(minPrice);
+      if(maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    const properties = await Property.find(filter);
     res.status(200).json(properties);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -70,6 +95,13 @@ router.put('/:id', requireAuth, upload.array('images', 6), async (req, res) => {
     await property.save();
     res.status(200).json(property);
   } catch (error) {
+
+     // Mongoose validation failures (bad enum, missing required field, etc)
+    // are the client's fault — changing respond status to 400, not 500
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
+    
     res.status(500).json({ message: error.message });
   }
 });

@@ -9,6 +9,7 @@ const propertySchema = new mongoose.Schema(
     },
     propertyType: {
       type: String,
+      enum :["Room", "1 RK", "1 BHK", "2 BHK", "3 BHK", "Independent House", "PG"],
       required: true,
     },
     description: {
@@ -28,8 +29,8 @@ const propertySchema = new mongoose.Schema(
     },
     priceType: {
       type: String,
-      enum: ['weekly', 'monthly'],
-      default: 'monthly',
+      enum: ['daily', 'weekly', 'monthly'],
+      default: 'weekly',
     },
     price: {
       type: Number,
