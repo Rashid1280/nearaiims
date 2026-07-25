@@ -60,13 +60,13 @@ router.put('/:id', requireAuth, upload.array('images', 6), async (req, res) => {
       return res.status(403).json({ message: 'You can only edit your own listings' });
     }
 
-      if(!req.files || req.files.length ===0){
-     return res.status(400).json({message : 'At least one image is required'})
+     Object.assign(property, req.body);
+
+      if(req.files && req.files.length >0){
+    property.images = req.files.map((file)=> `/uploads/${file.filename}`)
+     
     }
-
-    const images = req.files.map((file)=> `/uploads/${file.filename}` );
-
-    Object.assign(property, req.body, {images});
+   
     await property.save();
     res.status(200).json(property);
   } catch (error) {
