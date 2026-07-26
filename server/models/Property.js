@@ -38,10 +38,8 @@ const propertySchema = new mongoose.Schema(
       min: 0,
     },
     amenities: {
-      furnished: { type: Boolean, default: false },
-      ac: { type: Boolean, default: false },
-      kitchenAccess: { type: Boolean, default: false },
-      parking: { type: Boolean, default: false },
+     type: [String],
+     enum: ['furnished', 'ac', 'kitchenAccess', 'parking'],
     },
     ownerContactNumber: {
       type: String,
