@@ -5,6 +5,7 @@ const authRoutes = require('./routes/authRoutes');
 const cookieParser = require('cookie-parser');
 const propertyRoutes = require('./routes/propertyRoutes');
 const path = require('path');
+const bookingRoutes = require('./routes/bookingRoutes')
 
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(cookieParser());
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/bookings', bookingRoutes);
 
 const PORT = process.env.PORT || 5000;
 

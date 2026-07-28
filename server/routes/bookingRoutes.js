@@ -56,6 +56,36 @@ router.get('/received', requireAuth, async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-})
+});
+
+// UPDATE — only the property owner can accept or decline
+router.put('/:id/status', requireAuth, async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (!['accepted', 'declined'].includes(status)) {
+      return res.status(400).json({ message: 'Status must be accepted or declined' });
+    }
+
+    const booking = await Booking.findById(req.params.id);
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // only the owner of the property being booked can respond to the request
+    if (String(booking.owner) !== String(req.user._id)) {
+      return res.status(403).json({ message: 'You can only respond to requests for your own properties' });
+    }
+
+    booking.status = status;
+    await booking.save();
+    res.status(200).json(booking);
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ message: error.message });
+    }
+    res.status(500).json({ message: error.message });
+  }
+});
 
 module.exports = router;
