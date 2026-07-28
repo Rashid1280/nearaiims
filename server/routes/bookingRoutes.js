@@ -38,4 +38,24 @@ router.post('/', requireAuth, async (req, res) => {
   }
 });
 
+// READ — bookings I made as a renter
+router.get('/mine', requireAuth, async (req, res) => {
+  try {
+    const bookings = await Booking.find({ renter: req.user._id }).populate('property', 'propertyType location price');
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// READ — booking requests received, for properties I own
+router.get('/received', requireAuth, async (req, res) => {
+  try {
+    const bookings = await Booking.find({ owner: req.user._id }).populate('property', 'propertyType location price').populate('renter', 'name phone');
+    res.status(200).json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+})
+
 module.exports = router;
