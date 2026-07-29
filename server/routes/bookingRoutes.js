@@ -77,6 +77,21 @@ router.put('/:id/status', requireAuth, async (req, res) => {
       return res.status(403).json({ message: 'You can only respond to requests for your own properties' });
     }
 
+    // only check for date conflicts when actually accepting (not declining)
+    if (status === 'accepted') {
+        const overlappingBooking = await Booking.findOne({
+        property: booking.property,
+        status: 'accepted', // only confirmed bookings count as real conflicts
+        _id: { $ne: booking._id }, // exclude this booking itself (only invoked when a user double click on accepted bcoz first time, the status of current booking is still pending)
+        startDate: { $lte: booking.endDate }, // does THIS one start before the other ends?
+        endDate: { $gte: booking.startDate }, // does THIS one end after the other starts?
+  });
+
+  if (overlappingBooking) {
+    return res.status(400).json({ message: 'This property already has an accepted booking that overlaps these dates' });
+  }
+}
+
     booking.status = status;
     await booking.save();
     res.status(200).json(booking);
