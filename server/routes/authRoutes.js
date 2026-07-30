@@ -3,18 +3,20 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const { requireAuth } = require('../middleware/auth'); 
+const AppError = require('../utils/AppError');
+
 
 const router = express.Router();
 
 //REGISTER A USER
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
     
     // check for a duplicate first so we can return a clean, specific message instead of letting MongoDB throw its own duplicate-key error
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: 'An account with that email already exists' });
+      return next(new AppError('An account with that email already exists',409));
     }
 
     // 10 salt rounds - increase in rounds also increase security but speed gets slower
@@ -27,25 +29,25 @@ router.post('/register', async (req, res) => {
       name: user.name,
       email: user.email,
     });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+      next(error);
   }
 });
 
 
 //LOGIN A USER
-router.post('/login', async (req, res) => {
+router.post('/login', async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return next(new AppError('Invalid email or password',401));
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return next(new AppError('Invalid email or password',401));
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -63,8 +65,8 @@ res.cookie('token', token, {
     res.status(200).json({
       user: { id: user._id, name: user.name, email: user.email },
     });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+  } catch (error) {
+    next(error);
   }
 });
 

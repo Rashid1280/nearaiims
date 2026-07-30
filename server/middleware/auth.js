@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const AppError = require('../utils/AppError');
 
 // protects any route it's attached to - only lets the request through if a valid, currently-logged-in user made it.
 async function requireAuth(req, res, next) {
@@ -7,7 +8,7 @@ async function requireAuth(req, res, next) {
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(401).json({ message: 'Not authenticated' });
+      return next( new AppError('Not authenticated',401))
     }
 
     // throws error if the signature doesn't match or the token expired
@@ -17,15 +18,18 @@ async function requireAuth(req, res, next) {
     // be valid for a user that was deleted after it was issued
     const user = await User.findById(decoded.id);
     if (!user) {
-      return res.status(401).json({ message: 'User no longer exists' });
+      return next( new AppError('User no longer exists',401))
     }
     
     // attaches that user to req.user so the actual route doesn't have to look it up again
     // req is the shared object passed to the next function in line 
     req.user = user;
     next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired session' });
+  } catch (error) {
+    if(error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError'){
+      return next( new AppError('Invalid or expired session',401))
+    }
+    return next( new AppError('Something went wrong on our side', 500));
   }
 }
 

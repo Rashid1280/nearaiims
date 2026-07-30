@@ -2,15 +2,16 @@ const express = require('express');
 const Property = require('../models/Property');
 const { requireAuth } = require('../middleware/auth');
 const upload = require('../middleware/upload');
+const AppError = require('../utils/AppError');
 
 const router = express.Router();
 
 // CREATE — must be logged in
-router.post('/', requireAuth, upload.array('images', 6), async (req, res) => {
+router.post('/', requireAuth, upload.array('images', 6), async (req, res, next) => {
   try {
 
     if(!req.files || req.files.length ===0){
-     return res.status(400).json({message : 'At least one image is required'})
+      return next(new AppError('At least one image is required', 400))
     }
     const images = req.files.map((file)=> `/uploads/${file.filename}` );
     
@@ -21,18 +22,12 @@ router.post('/', requireAuth, upload.array('images', 6), async (req, res) => {
     });
     res.status(201).json(property);
   } catch (error) {
-
-    // Mongoose validation failures (bad enum, missing required field, etc)
-    // are the client's fault — changing respond status to 400, not 500
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: error.message });
-    }
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
 // READ — all properties, public, no login needed
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
 
     const {location, propertyType, minPrice, maxPrice} = req.query;
@@ -56,33 +51,35 @@ router.get('/', async (req, res) => {
     const properties = await Property.find(filter);
     res.status(200).json(properties);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
 // READ — one property, public, with owner's info populated
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req, res, next) => {
   try {
+
     const property = await Property.findById(req.params.id).populate('owner', 'name');
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' });
+      return next(new AppError('Property not found',404))
     }
+
     res.status(200).json(property);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
 // UPDATE — must be logged in AND must own this specific property
-router.put('/:id', requireAuth, upload.array('images', 6), async (req, res) => {
+router.put('/:id', requireAuth, upload.array('images', 6), async (req, res, next) => {
   try {
 
     const property = await Property.findById(req.params.id);
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' });
+      return next(new AppError('Property not found',404))
     }
     if (String(property.owner) !== String(req.user._id)) {
-      return res.status(403).json({ message: 'You can only edit your own listings' });
+      return next(new AppError('You can only edit your own listings',403))
     }
 
      Object.assign(property, req.body);
@@ -95,32 +92,25 @@ router.put('/:id', requireAuth, upload.array('images', 6), async (req, res) => {
     await property.save();
     res.status(200).json(property);
   } catch (error) {
-
-     // Mongoose validation failures (bad enum, missing required field, etc)
-    // are the client's fault — changing respond status to 400, not 500
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({ message: error.message });
-    }
-    
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
 // DELETE — same ownership rule as update
-router.delete('/:id', requireAuth, async (req, res) => {
+router.delete('/:id', requireAuth, async (req, res, next) => {
   try {
     const property = await Property.findById(req.params.id);
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' });
+      return next(new AppError('Property not found',404))
     }
     if (String(property.owner) !== String(req.user._id)) {
-      return res.status(403).json({ message: 'You can only delete your own listings' });
+      return next(new AppError('You can only delete your own listings',403))
     }
 
     await property.deleteOne();
     res.status(200).json({ message: 'Property deleted' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
