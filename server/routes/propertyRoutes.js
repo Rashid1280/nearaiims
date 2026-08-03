@@ -84,7 +84,7 @@ router.put('/:id', requireAuth, upload.array('images', 6), async (req, res, next
 
      Object.assign(property, req.body);
 
-      if(req.files && req.files.length >0){
+      if(req.files.length >0){
     property.images = req.files.map((file)=> `/uploads/${file.filename}`)
      
     }
