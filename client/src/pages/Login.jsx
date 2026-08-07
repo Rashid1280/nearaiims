@@ -12,7 +12,7 @@ function Login() {
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
-    e.preventDefault(); // stop the browser's default full-page form submission
+    e.preventDefault(); 
 
     try {
       const response = await axios.post(
@@ -20,8 +20,8 @@ function Login() {
         { email, password },
         { withCredentials: true }
       );
-      setUser(response.data.user); // update global auth state immediately
-      navigate('/'); // redirect after successful login
+      setUser(response.data.user); 
+      navigate('/'); 
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     }
