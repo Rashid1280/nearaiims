@@ -2,6 +2,8 @@ import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Home from './pages/Home.jsx';
 import Properties from './pages/Properties.jsx';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
 
 function App() {
   const { user, loading } = useAuth();
@@ -25,6 +27,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/properties" element={<Properties />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
       </Routes>
     </div>
   );
