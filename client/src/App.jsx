@@ -4,9 +4,23 @@ import Home from './pages/Home.jsx';
 import Properties from './pages/Properties.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
-  const { user, loading } = useAuth();
+  const { user, setUser, loading } = useAuth();
+  const navigate = useNavigate();
+
+  async function handleLogout() {
+     axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true })
+          .then(() => {
+            setUser(null);
+            navigate('/');
+          })
+          .catch((err) => console.error('Logout failed:', err));
+}
+
+   
 
   return (
     <div>
@@ -22,6 +36,8 @@ function App() {
         ) : (
           <span>Not logged in</span>
         )}
+        {user && <button onClick={handleLogout}>Logout</button>}        
+
       </nav>
 
       <Routes>

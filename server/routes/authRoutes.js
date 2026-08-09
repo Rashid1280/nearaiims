@@ -70,6 +70,16 @@ res.cookie('token', token, {
   }
 });
 
+// LOGOUT — clears the auth cookie
+router.post('/logout', (req, res) => {
+  res.clearCookie('token', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  });
+  res.status(200).json({ message: 'Logged out' });
+});
+
 //DASHBOARD AFTER LOGIN
 router.get('/me', requireAuth, async (req, res) => {
 
