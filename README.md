@@ -103,7 +103,7 @@ The frontend runs on Vite's default port (typically `5173`) and talks to the bac
 
 ## Status
 
-Currently in active development. Backend (auth, properties, bookings) and core frontend auth flow (login/register, protected routes) are complete. Remaining work: full browse/filter UI, property detail pages, booking forms, owner dashboard, styling, and deployment.
+Currently in active development. Backend (auth, properties, bookings) and core frontend auth flow (login/register, protected routes) are complete. Remaining work: property detail pages, booking forms, owner dashboard, styling, and deployment.
 
 ## Known Limitations
 
