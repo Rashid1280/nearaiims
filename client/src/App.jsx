@@ -1,5 +1,5 @@
 import { Routes, Route, Link } from 'react-router-dom';
-import { useAuth } from './context/useAuth.js';
+import { useAuth } from './context/AuthContext.jsx';
 import Home from './pages/Home.jsx';
 import Properties from './pages/Properties.jsx';
 import Login from './pages/Login.jsx';
