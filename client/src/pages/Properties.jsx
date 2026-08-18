@@ -34,7 +34,7 @@ function Properties() {
       <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max Price" />
 
       {properties.map((property) => (
-        <PropertyCard key={property._id} />
+        <PropertyCard key={property._id} property={property} />
       ))}
     </div>
   );
