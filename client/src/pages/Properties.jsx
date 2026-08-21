@@ -5,33 +5,77 @@ import PropertyCard from '../PropertyCard.jsx';
 function Properties() {
   const [properties, setProperties] = useState([]);
 
-  // filter fields - controlled inputs, same pattern as Login.jsx
   const [location, setLocation] = useState('');
   const [propertyType, setPropertyType] = useState('');
   const [minPrice, setMinPrice] = useState('');
   const [maxPrice, setMaxPrice] = useState('');
 
-  useEffect(() => {
-    // build query params only from filters that actually have a value
+  // builds the filter object and asks the backend for matching properties
+  async function fetchProperties() {
     const params = {};
     if (location) params.location = location;
     if (propertyType) params.propertyType = propertyType;
     if (minPrice) params.minPrice = minPrice;
     if (maxPrice) params.maxPrice = maxPrice;
 
-    axios.get('http://localhost:5000/api/properties', { params })
-      .then((response) => setProperties(response.data))
-      .catch((error) => console.error('Failed to fetch properties:', error));
-  }, [location, propertyType, minPrice, maxPrice]);
+    try {
+      const response = await axios.get('http://localhost:5000/api/properties', { params });
+      setProperties(response.data);
+    } catch (error) {
+      console.error('Failed to fetch properties:', error);
+    }
+  }
+
+  // runs once on page load only - no filter dependencies, so no per-keystroke fetching
+  useEffect(() => {
+    fetchProperties();
+  }, []);
+
+  function handleSearch(e) {
+    e.preventDefault();
+    fetchProperties();
+  }
 
   return (
     <div>
       <h1>Available Properties</h1>
 
-      <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" />
-      <input value={propertyType} onChange={(e) => setPropertyType(e.target.value)} placeholder="Property Type" />
-      <input value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min Price" />
-      <input value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max Price" />
+      <form onSubmit={handleSearch}>
+        <input
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          placeholder="Location"
+        />
+
+        <select
+          value={propertyType}
+          onChange={(e) => setPropertyType(e.target.value)}
+        >
+          <option value="">Any type</option>
+          <option value="Room">Room</option>
+          <option value="1 RK">1 RK</option>
+          <option value="1 BHK">1 BHK</option>
+          <option value="2 BHK">2 BHK</option>
+          <option value="3 BHK">3 BHK</option>
+          <option value="Independent House">Independent House</option>
+          <option value="PG">PG</option>
+        </select>
+
+        <input
+          type="number"
+          value={minPrice}
+          onChange={(e) => setMinPrice(e.target.value)}
+          placeholder="Min Price"
+        />
+        <input
+          type="number"
+          value={maxPrice}
+          onChange={(e) => setMaxPrice(e.target.value)}
+          placeholder="Max Price"
+        />
+
+        <button type="submit">Search</button>
+      </form>
 
       {properties.map((property) => (
         <PropertyCard key={property._id} property={property} />
