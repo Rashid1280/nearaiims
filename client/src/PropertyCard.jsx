@@ -9,7 +9,7 @@ function PropertyCard({ property }) {
     <div className="property-card">
       {images && images.length > 0 && (
         <img
-          src={`http://localhost:5000/${images[0]}`}
+          src={`http://localhost:5000${images[0]}`}
           alt={propertyType}
           width="200"
         />
