@@ -6,6 +6,7 @@ import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import PropertyDetail from './pages/PropertyDetail.jsx'
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -45,6 +46,7 @@ function App() {
         <Route path="/properties" element={<Properties />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path='/properties/:id' element={<PropertyDetail/>}/>
       </Routes>
     </div>
   );

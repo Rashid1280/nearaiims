@@ -1,8 +1,11 @@
+import { Link } from "react-router-dom";
+
 function PropertyCard({ property }) {
  if (!property) return null;
-  const { propertyType, location, address, price, priceType, images } = property;
+  const {_id, propertyType, location, address, price, priceType, images } = property;
 
   return (
+    <Link to={`/properties/${_id}`}>
     <div className="property-card">
       {images && images.length > 0 && (
         <img
@@ -15,6 +18,7 @@ function PropertyCard({ property }) {
       <p>{address}</p>
       <p>₹{price} / {priceType}</p>
     </div>
+    </Link>
   );
 }
 
