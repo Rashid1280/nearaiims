@@ -26,7 +26,7 @@ function Properties() {
     }
   }
 
-  // runs once on page load only - no filter dependencies, so no per-keystroke fetching
+  // runs once on page load only - no filter yet so all properties shows at once
   useEffect(() => {
     fetchProperties();
   }, []);
