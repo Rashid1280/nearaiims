@@ -1,4 +1,4 @@
-import { Routes, Route, Link, Links } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Home from './pages/Home.jsx';
 import Properties from './pages/Properties.jsx';
@@ -13,13 +13,14 @@ function App() {
   const { user, setUser, loading } = useAuth();
   const navigate = useNavigate();
 
-  async function handleLogout() {
-     axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true })
-          .then(() => {
-            setUser(null);
-            navigate('/');
-          })
-          .catch((err) => console.error('Logout failed:', err));
+async function handleLogout() {
+  try {
+    await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+    setUser(null);
+    navigate('/');
+  } catch (err) {
+    console.error('Logout failed:', err);
+  }
 }
 
    
