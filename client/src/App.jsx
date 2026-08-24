@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, Links } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import Home from './pages/Home.jsx';
 import Properties from './pages/Properties.jsx';
@@ -7,6 +7,7 @@ import Register from './pages/Register.jsx';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import PropertyDetail from './pages/PropertyDetail.jsx'
+import OwnerDashboard from './pages/OwnerDashboard.jsx';
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -37,6 +38,9 @@ function App() {
         ) : (
           <span>Not logged in</span>
         )}
+        {' | '}
+        {user && <Link to={'/dashboard'}>My Dashboard</Link>}
+        {' | '}
         {user && <button onClick={handleLogout}>Logout</button>}        
 
       </nav>
@@ -47,6 +51,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path='/properties/:id' element={<PropertyDetail/>}/>
+        <Route path='/dashboard' element={<OwnerDashboard/>}/>
       </Routes>
     </div>
   );
