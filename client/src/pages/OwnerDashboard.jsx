@@ -27,6 +27,20 @@ function OwnerDashboard() {
     return <p>Loading requests...</p>;
   }
 
+  async function handleStatusUpdate(bookingId, newStatus) {
+    try {
+     await axios.put(`http://localhost:5000/api/bookings/${bookingId}/status`, { status: newStatus }, {withCredentials:true});
+     setBookings((prevBookings)=>
+      prevBookings.map((booking)=>
+        booking._id===bookingId ? {...booking, status:newStatus} : booking
+      )
+     )
+     
+    } catch (error) {
+      console.error('Failed to update booking status:',error)
+    }
+  }
+
   return (
     <div>
       <h1>Booking Requests</h1>
@@ -41,9 +55,17 @@ function OwnerDashboard() {
             <p>{booking.startDate.slice(0, 10)} to {booking.endDate.slice(0, 10)}</p>
             {booking.message && <p>Message: {booking.message}</p>}
             <p>Status: {booking.status}</p>
+            {booking.status === 'pending' && (
+        <>
+       <button onClick={() => handleStatusUpdate(booking._id, 'accepted')}>Accept</button>
+       <button onClick={() => handleStatusUpdate(booking._id, 'declined')}>Decline</button>
+        </>
+      )}
           </div>
         ))
       )}
+
+      
     </div>
   );
 }
