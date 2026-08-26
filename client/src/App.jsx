@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import PropertyDetail from './pages/PropertyDetail.jsx'
 import OwnerDashboard from './pages/OwnerDashboard.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -52,7 +53,7 @@ async function handleLogout() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path='/properties/:id' element={<PropertyDetail/>}/>
-        <Route path='/dashboard' element={<OwnerDashboard/>}/>
+        <Route path='/dashboard' element={ <ProtectedRoute> <OwnerDashboard /> </ProtectedRoute>}/>
       </Routes>
     </div>
   );
