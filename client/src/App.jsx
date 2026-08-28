@@ -28,24 +28,51 @@ async function handleLogout() {
 
   return (
     <div>
-      <nav>
-        <Link to="/">Home</Link>
-        {' | '}
-        <Link to="/properties">Properties</Link>
-        {' | '}
-        {loading ? (
-          <span>Checking session...</span>
-        ) : user ? (
-          <span>Logged in as {user.name}</span>
-        ) : (
-          <span>Not logged in</span>
-        )}
-        {' | '}
-        {user && <Link to={'/dashboard'}>My Dashboard</Link>}
-        {' | '}
-        {user && <button onClick={handleLogout}>Logout</button>}        
 
-      </nav>
+<nav className="flex items-center gap-6 px-6 py-4 border-b border-gray-200 bg-white">
+
+  <Link to="/" className="font-semibold text-gray-900 hover:text-violet-600">
+    Home
+  </Link>
+
+  <Link to="/properties" className="text-gray-700 hover:text-violet-600">
+    Properties
+  </Link>
+
+  <div className="ml-auto flex items-center gap-6">
+
+    {loading ? (
+      <span className="text-sm text-gray-400">Checking session...</span>
+    ) : user ? (
+      <span className="text-sm text-gray-600">Logged in as {user.name}</span>
+    ) : (
+      <>
+        <Link to="/login" className="text-gray-700 hover:text-violet-600">
+          Login
+        </Link>
+        <Link to="/register" className="text-gray-700 hover:text-violet-600">
+          Register
+        </Link>
+      </>
+    )}
+
+    {user && (
+      <Link to="/dashboard" className="text-gray-700 hover:text-violet-600">
+        My Dashboard
+      </Link>
+    )}
+
+    {user && (
+      <button
+        onClick={handleLogout}
+        className="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700"
+      >
+        Logout
+      </button>
+    )}
+
+  </div>
+</nav>
 
       <Routes>
         <Route path="/" element={<Home />} />
