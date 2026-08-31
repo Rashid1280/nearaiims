@@ -1,11 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand: #2f7a78;
-  --color-brand-dark: #1f5654;
-  --color-accent: #ef8354;
-  --color-surface: #f7f7f5;
-  --color-ink: #1f2430;
+  --color-brand: #146c94;
+  --color-brand-dark: #0f5273;
+  --color-accent: #2e9e6b;
+  --color-danger: #dc2626;
+  --color-surface: #f4f8fa;
+  --color-ink: #1c2b36;
+  --color-muted: #5b7280;
+  --color-line: #dbe4ea;
 
   --font-sans: 'Segoe UI', system-ui, sans-serif;
 }
