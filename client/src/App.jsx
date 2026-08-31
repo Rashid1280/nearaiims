@@ -5,14 +5,17 @@ import Properties from './pages/Properties.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import axios from 'axios';
+import { Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropertyDetail from './pages/PropertyDetail.jsx'
 import OwnerDashboard from './pages/OwnerDashboard.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import { useState } from 'react';
 
 function App() {
   const { user, setUser, loading } = useAuth();
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
 
 async function handleLogout() {
   try {
@@ -29,50 +32,71 @@ async function handleLogout() {
   return (
     <div>
 
-<nav className="flex items-center gap-6 px-6 py-4 border-b border-gray-200 bg-white">
+<nav className="px-6 py-4 border-b border-line bg-white">
 
-  <Link to="/" className="font-semibold text-gray-900 hover:text-violet-600">
-    Home
-  </Link>
+        {/* top row: always visible, on every screen size */}
+        <div className="flex items-center justify-between">
+          <Link to="/" className="font-semibold text-brand text-lg">NearAIIMS</Link>
 
-  <Link to="/properties" className="text-gray-700 hover:text-violet-600">
-    Properties
-  </Link>
+          {/* hamburger button - only rendered below the md breakpoint */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="md:hidden text-ink"
+            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+          >
+            {menuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
-  <div className="ml-auto flex items-center gap-6">
+          {/* full nav links - hidden on mobile, shown as a row from md upward */}
+          <div className="hidden md:flex md:items-center md:gap-6">
+            <Link to="/properties" className="text-ink hover:text-brand">Properties</Link>
 
-    {loading ? (
-      <span className="text-sm text-gray-400">Checking session...</span>
-    ) : user ? (
-      <span className="text-sm text-gray-600">Logged in as {user.name}</span>
-    ) : (
-      <>
-        <Link to="/login" className="text-gray-700 hover:text-violet-600">
-          Login
-        </Link>
-        <Link to="/register" className="text-gray-700 hover:text-violet-600">
-          Register
-        </Link>
-      </>
-    )}
+            {loading ? (
+              <span className="text-sm text-muted">Checking session...</span>
+            ) : user ? (
+              <span className="text-sm text-muted">Logged in as {user.name}</span>
+            ) : (
+              <>
+                <Link to="/login" className="text-ink hover:text-brand">Login</Link>
+                <Link to="/register" className="text-ink hover:text-brand">Register</Link>
+              </>
+            )}
 
-    {user && (
-      <Link to="/dashboard" className="text-gray-700 hover:text-violet-600">
-        My Dashboard
-      </Link>
-    )}
+            {user && <Link to="/dashboard" className="text-ink hover:text-brand">My Dashboard</Link>}
+            {user && (
+              <button onClick={handleLogout} className="px-3 py-1.5 rounded-md bg-brand text-white text-sm hover:bg-brand-dark">
+                Logout
+              </button>
+            )}
+          </div>
+        </div>
 
-    {user && (
-      <button
-        onClick={handleLogout}
-        className="px-3 py-1.5 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700"
-      >
-        Logout
-      </button>
-    )}
+        {/* mobile dropdown menu - only rendered when menuOpen is true, and only below md */}
+        {menuOpen && (
+          <div className="md:hidden flex flex-col gap-3 mt-4">
+            <Link to="/properties" onClick={() => setMenuOpen(false)} className="text-ink">Properties</Link>
 
-  </div>
-</nav>
+            {loading ? (
+              <span className="text-sm text-muted">Checking session...</span>
+            ) : user ? (
+              <span className="text-sm text-muted">Logged in as {user.name}</span>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="text-ink">Login</Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="text-ink">Register</Link>
+              </>
+            )}
+
+            {user && <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="text-ink">My Dashboard</Link>}
+            {user && (
+              <button onClick={handleLogout} className="px-3 py-1.5 rounded-md bg-brand text-white text-sm text-left">
+                Logout
+              </button>
+            )}
+          </div>
+        )}
+
+      </nav>
 
       <Routes>
         <Route path="/" element={<Home />} />
