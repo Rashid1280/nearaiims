@@ -11,34 +11,29 @@ import PropertyDetail from './pages/PropertyDetail.jsx'
 import OwnerDashboard from './pages/OwnerDashboard.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useState } from 'react';
+import AddProperty from './pages/AddProperty.jsx';
 
 function App() {
   const { user, setUser, loading } = useAuth();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
 
-async function handleLogout() {
-  try {
-    await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
-    setUser(null);
-    navigate('/');
-  } catch (err) {
-    console.error('Logout failed:', err);
+  async function handleLogout() {
+    try {
+      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      setUser(null);
+      navigate('/');
+    } catch (err) {
+      console.error('Logout failed:', err);
+    }
   }
-}
-
-   
 
   return (
     <div>
-
-<nav className="px-6 py-4 border-b border-line bg-white">
-
-        {/* top row: always visible, on every screen size */}
-        <div className="flex items-center justify-between">
+      <nav className="px-6 py-4 border-b border-line bg-white">
+        <div className="flex items-center justify-between flex-wrap">
           <Link to="/" className="font-semibold text-brand text-lg">NearAIIMS</Link>
 
-          {/* hamburger button - only rendered below the md breakpoint */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden text-ink"
@@ -47,9 +42,13 @@ async function handleLogout() {
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* full nav links - hidden on mobile, shown as a row from md upward */}
-          <div className="hidden md:flex md:items-center md:gap-6">
-            <Link to="/properties" className="text-ink hover:text-brand">Properties</Link>
+          <div
+            className={`${menuOpen ? 'flex' : 'hidden'} w-full flex-col gap-3 mt-4
+                        md:flex md:w-auto md:flex-row md:items-center md:gap-6 md:mt-0`}
+          >
+            <Link to="/properties" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+              Properties
+            </Link>
 
             {loading ? (
               <span className="text-sm text-muted">Checking session...</span>
@@ -57,45 +56,35 @@ async function handleLogout() {
               <span className="text-sm text-muted">Logged in as {user.name}</span>
             ) : (
               <>
-                <Link to="/login" className="text-ink hover:text-brand">Login</Link>
-                <Link to="/register" className="text-ink hover:text-brand">Register</Link>
+                <Link to="/login" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                  Login
+                </Link>
+                <Link to="/register" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                  Register
+                </Link>
               </>
             )}
 
-            {user && <Link to="/dashboard" className="text-ink hover:text-brand">My Dashboard</Link>}
             {user && (
-              <button onClick={handleLogout} className="px-3 py-1.5 rounded-md bg-brand text-white text-sm hover:bg-brand-dark">
+              <Link to="/add-property" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                List a property
+              </Link>
+            )}
+            {user && (
+              <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                My Dashboard
+              </Link>
+            )}
+            {user && (
+              <button
+                onClick={() => { setMenuOpen(false); handleLogout(); }}
+                className="px-3 py-1.5 rounded-md bg-brand text-white text-sm hover:bg-brand-dark"
+              >
                 Logout
               </button>
             )}
           </div>
         </div>
-
-        {/* mobile dropdown menu - only rendered when menuOpen is true, and only below md */}
-        {menuOpen && (
-          <div className="md:hidden flex flex-col gap-3 mt-4">
-            <Link to="/properties" onClick={() => setMenuOpen(false)} className="text-ink">Properties</Link>
-
-            {loading ? (
-              <span className="text-sm text-muted">Checking session...</span>
-            ) : user ? (
-              <span className="text-sm text-muted">Logged in as {user.name}</span>
-            ) : (
-              <>
-                <Link to="/login" onClick={() => setMenuOpen(false)} className="text-ink">Login</Link>
-                <Link to="/register" onClick={() => setMenuOpen(false)} className="text-ink">Register</Link>
-              </>
-            )}
-
-            {user && <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="text-ink">My Dashboard</Link>}
-            {user && (
-              <button onClick={handleLogout} className="px-3 py-1.5 rounded-md bg-brand text-white text-sm text-left">
-                Logout
-              </button>
-            )}
-          </div>
-        )}
-
       </nav>
 
       <Routes>
@@ -105,6 +94,7 @@ async function handleLogout() {
         <Route path="/register" element={<Register />} />
         <Route path='/properties/:id' element={<PropertyDetail/>}/>
         <Route path='/dashboard' element={ <ProtectedRoute> <OwnerDashboard /> </ProtectedRoute>}/>
+        <Route path="/add-property" element={<ProtectedRoute><AddProperty /></ProtectedRoute>} />
       </Routes>
     </div>
   );
