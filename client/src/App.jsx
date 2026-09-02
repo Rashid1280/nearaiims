@@ -50,6 +50,17 @@ function App() {
               Properties
             </Link>
 
+            {user && (
+              <Link to="/add-property" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                List a property
+              </Link>
+            )}
+            {user && (
+              <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                My Dashboard
+              </Link>
+            )}
+
             {loading ? (
               <span className="text-sm text-muted">Checking session...</span>
             ) : user ? (
@@ -64,17 +75,7 @@ function App() {
                 </Link>
               </>
             )}
-
-            {user && (
-              <Link to="/add-property" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
-                List a property
-              </Link>
-            )}
-            {user && (
-              <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
-                My Dashboard
-              </Link>
-            )}
+            
             {user && (
               <button
                 onClick={() => { setMenuOpen(false); handleLogout(); }}
