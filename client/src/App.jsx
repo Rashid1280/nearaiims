@@ -12,6 +12,7 @@ import OwnerDashboard from './pages/OwnerDashboard.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useState } from 'react';
 import AddProperty from './pages/AddProperty.jsx';
+import EditProperty from './pages/EditProperty.jsx';
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -96,6 +97,7 @@ function App() {
         <Route path='/properties/:id' element={<PropertyDetail/>}/>
         <Route path='/dashboard' element={ <ProtectedRoute> <OwnerDashboard /> </ProtectedRoute>}/>
         <Route path="/add-property" element={<ProtectedRoute><AddProperty /></ProtectedRoute>} />
+        <Route path="/edit-property/:id" element={<ProtectedRoute><EditProperty /></ProtectedRoute>} />
       </Routes>
     </div>
   );
