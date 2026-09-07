@@ -55,6 +55,16 @@ router.get('/', async (req, res, next) => {
   }
 });
 
+// READ — only the logged-in user's own listings, regardless of availability
+router.get('/mine', requireAuth, async (req, res, next) => {
+  try {
+    const properties = await Property.find({ owner: req.user._id });
+    res.status(200).json(properties);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // READ — one property, public, with owner's info populated
 router.get('/:id', async (req, res, next) => {
   try {
@@ -84,7 +94,7 @@ router.put('/:id', requireAuth, upload.array('images', 6), async (req, res, next
 
      Object.assign(property, req.body);
 
-      if(req.files.length >0){
+      if(req.files && req.files.length >0){
     property.images = req.files.map((file)=> `/uploads/${file.filename}`)
      
     }
