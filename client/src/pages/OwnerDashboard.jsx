@@ -16,6 +16,10 @@ function OwnerDashboard() {
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsError, setListingsError] = useState('');
 
+  // ---- My Bookings (as a renter) ----
+  const [myBookings, setMyBookings] = useState([]);
+  const [myBookingsLoading, setMyBookingsLoading] = useState(true);
+
    function daysAgo(dateString) {
     if (!dateString) return '';
     const diffMs = Date.now() - new Date(dateString).getTime();
@@ -61,6 +65,23 @@ function OwnerDashboard() {
       }
     }
     fetchListings();
+  }, []);
+
+  useEffect(() => {
+    async function fetchMyBookings() {
+      try {
+        const response = await axios.get(
+          'http://localhost:5000/api/bookings/mine',
+          { withCredentials: true }
+        );
+        setMyBookings(response.data);
+      } catch (error) {
+        console.error('Failed to fetch my bookings:', error);
+      } finally {
+        setMyBookingsLoading(false);
+      }
+    }
+    fetchMyBookings();
   }, []);
 
   async function handleStatusUpdate(bookingId, newStatus) {
@@ -117,6 +138,12 @@ function OwnerDashboard() {
     return 'bg-line text-muted';
   }
 
+  // guards against bad/missing 
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    return dateString.slice(0, 10);
+  }
+
   //isActive compares the passed-in tab argument against the component's activeTab state — if they match, it gets underline and colored text, signaling "you're here"
   function tabClassName(tab) {
     const isActive = activeTab === tab;
@@ -135,6 +162,9 @@ function OwnerDashboard() {
         </button>
         <button onClick={() => setActiveTab('received')} className={tabClassName('received')}>
           Requests Received
+        </button>
+        <button onClick={() => setActiveTab('bookings')} className={tabClassName('bookings')}>
+          My Bookings
         </button>
       </div>
 
@@ -241,7 +271,7 @@ function OwnerDashboard() {
                         Requested by: {booking.renter.name} ({booking.renter.phone})
                       </p>
                       <p className="text-sm text-ink mt-1">
-                        {booking.startDate.slice(0, 10)} to {booking.endDate.slice(0, 10)}
+                        {formatDate(booking.startDate)} to {formatDate(booking.endDate)}
                       </p>
                       {booking.message && (
                         <p className="text-sm text-muted mt-1">Message: {booking.message}</p>
@@ -273,6 +303,57 @@ function OwnerDashboard() {
       Requested by: {booking.renter.name} — this listing has since been deleted.
     </p>
   )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ---------------- My Bookings (as a renter) ---------------- */}
+      {activeTab === 'bookings' && (
+        <section className="mt-6">
+          {myBookingsLoading ? (
+            <p className="text-muted mt-4">Loading your bookings...</p>
+          ) : myBookings.length === 0 ? (
+            <p className="text-muted mt-4">
+              You haven't requested any bookings yet.{' '}
+              <Link to="/properties" className="text-brand underline">Browse properties</Link>
+            </p>
+          ) : (
+            <div className="flex flex-col gap-4 mt-4">
+              {myBookings.map((booking) => (
+                <div key={booking._id} className="border border-line rounded-lg p-5">
+                  {booking.property ? (
+                    <>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <h3 className="font-semibold text-ink">
+                            <Link to={`/properties/${booking.property._id}`} className="hover:text-brand">
+                              {booking.property.propertyType} in {booking.property.location}
+                            </Link>
+                          </h3>
+                          <p className="text-sm text-ink mt-1">
+                            {formatDate(booking.startDate)} to {formatDate(booking.endDate)}
+                          </p>
+                          <p className="text-sm text-muted mt-1">₹{booking.property.price}</p>
+                        </div>
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}>
+                          {booking.status}
+                        </span>
+                      </div>
+
+                      {booking.status === 'accepted' && (
+                        <p className="text-sm text-accent mt-3">
+                          Accepted! Open the listing to see the owner's contact number.
+                        </p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="text-sm text-muted">
+                      This listing is no longer available.
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
