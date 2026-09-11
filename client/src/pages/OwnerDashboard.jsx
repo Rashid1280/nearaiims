@@ -14,6 +14,7 @@ function OwnerDashboard() {
     // ---- My Listings ----
   const [listings, setListings] = useState([]);
   const [listingsLoading, setListingsLoading] = useState(true);
+  const [listingsError, setListingsError] = useState('');
 
    function daysAgo(dateString) {
     if (!dateString) return '';
@@ -75,6 +76,41 @@ function OwnerDashboard() {
     }
   }
 
+  // ---- Listing management actions ----
+
+  async function toggleAvailability(propertyId, currentValue) {
+    setListingsError('');
+    try {
+      await axios.put(
+        `http://localhost:5000/api/properties/${propertyId}`,
+        { isAvailable: !currentValue },
+        { withCredentials: true }
+      );
+      setListings((prev) =>
+        prev.map((property) =>
+          property._id === propertyId ? { ...property, isAvailable: !currentValue } : property
+        )
+      );
+    } catch (error) {
+      console.error('Failed to update availability:', error);
+      setListingsError('Could not update availability. Please try again.');
+    }
+  }
+
+  async function handleDelete(propertyId) {
+    const confirmed = window.confirm('Delete this listing permanently? This cannot be undone.');
+    if (!confirmed) return;
+
+    setListingsError('');
+    try {
+      await axios.delete(`http://localhost:5000/api/properties/${propertyId}`, { withCredentials: true });
+      setListings((prev) => prev.filter((property) => property._id !== propertyId));
+    } catch (error) {
+      console.error('Failed to delete property:', error);
+      setListingsError('Could not delete this listing. Please try again.');
+    }
+  }
+
   function statusBadgeStyle(status) {
     if (status === 'accepted') return 'bg-accent/10 text-accent';
     if (status === 'declined') return 'bg-danger/10 text-danger';
@@ -114,6 +150,8 @@ function OwnerDashboard() {
             </Link>
           </div>
 
+          {listingsError && <p className="text-danger text-sm mt-2">{listingsError}</p>}
+
           {listingsLoading ? (
             <p className="text-muted mt-4">Loading your listings...</p>
           ) : listings.length === 0 ? (
@@ -152,6 +190,27 @@ function OwnerDashboard() {
                     </div>
                     <p className="text-sm text-muted mt-1">₹{property.price} / {property.priceType}</p>
                     <p className="text-xs text-muted mt-1">{property.daysAgoLabel}</p>
+
+                    <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-line mt-3">
+                      <Link
+                        to={`/edit-property/${property._id}`}
+                        className="px-3 py-1.5 rounded-md border border-line text-ink text-xs font-medium hover:bg-surface"
+                      >
+                        Edit
+                      </Link>
+                      <button
+                        onClick={() => toggleAvailability(property._id, property.isAvailable)}
+                        className="px-3 py-1.5 rounded-md border border-line text-ink text-xs font-medium hover:bg-surface"
+                      >
+                        {property.isAvailable ? 'Mark unavailable' : 'Mark available'}
+                      </button>
+                      <button
+                        onClick={() => handleDelete(property._id)}
+                        className="px-3 py-1.5 rounded-md border border-danger text-danger text-xs font-medium hover:bg-danger/10"
+                      >
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
