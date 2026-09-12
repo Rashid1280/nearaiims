@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { ImageOff } from 'lucide-react'
+import { useAuth } from '../context/AuthContext';
 
 function OwnerDashboard() {
- 
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('received');
 
     // ---- Requests Received ----
@@ -152,9 +153,35 @@ function OwnerDashboard() {
     }`;
   }
 
+  // derived, not stored in state - recalculates automatically whenever
+  // `bookings` changes, so it can never drift out of sync with the real data
+  const totalPending = bookings.filter((booking) => booking.status === 'pending').length;
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-8">
-      <h1 className="text-2xl font-semibold text-ink">My Dashboard</h1>
+
+      {/* ---- welcome header + quick stats ---- */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold text-ink">Welcome back, {user?.name}</h1>
+          <p className="text-sm text-muted mt-1">{user?.email}</p>
+        </div>
+
+        <div className="flex gap-6">
+          <div className="text-center">
+            <p className="text-xl font-semibold text-ink">{listings.length}</p>
+            <p className="text-xs text-muted">Listings</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xl font-semibold text-ink">{totalPending}</p>
+            <p className="text-xs text-muted">Pending requests</p>
+          </div>
+          <div className="text-center">
+            <p className="text-xl font-semibold text-ink">{myBookings.length}</p>
+            <p className="text-xs text-muted">My bookings</p>
+          </div>
+        </div>
+      </div>
 
       <div className="flex gap-2 border-b border-line mt-6">
         <button onClick={() => setActiveTab('listings')} className={tabClassName('listings')}>

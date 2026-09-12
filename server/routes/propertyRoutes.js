@@ -78,7 +78,7 @@ router.get('/:id', async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       isOwner = String(property.owner._id) === String(decoded.id);
     } catch {
-      // bad/expired token - treat as anonymous
+      // bad/expired token - treat as anonymous - isOwner check because editProperty also calls this endpoint to edit property to prefill the input of contact number
     }
   }
 
