@@ -3,6 +3,7 @@ const Property = require('../models/Property');
 const { requireAuth } = require('../middleware/auth');
 const upload = require('../middleware/upload');
 const AppError = require('../utils/AppError');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
@@ -48,7 +49,7 @@ router.get('/', async (req, res, next) => {
       if(maxPrice) filter.price.$lte = Number(maxPrice);
     }
 
-    const properties = await Property.find(filter);
+    const properties = await Property.find(filter).select('-ownerContactNumber');
     res.status(200).json(properties);
   } catch (error) {
     next(error);
@@ -67,17 +68,24 @@ router.get('/mine', requireAuth, async (req, res, next) => {
 
 // READ — one property, public, with owner's info populated
 router.get('/:id', async (req, res, next) => {
-  try {
+  const property = await Property.findById(req.params.id).populate('owner', 'name').lean();
+  if (!property) return next(new AppError('Property not found', 404));
 
-    const property = await Property.findById(req.params.id).populate('owner', 'name');
-    if (!property) {
-      return next(new AppError('Property not found',404))
+  let isOwner = false;
+  const token = req.cookies.token;
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      isOwner = String(property.owner._id) === String(decoded.id);
+    } catch {
+      // bad/expired token - treat as anonymous
     }
-
-    res.status(200).json(property);
-  } catch (error) {
-    next(error);
   }
+
+  if (!isOwner) {
+    delete property.ownerContactNumber;
+  }
+  res.status(200).json(property);
 });
 
 // UPDATE — must be logged in AND must own this specific property

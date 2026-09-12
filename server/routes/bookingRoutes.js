@@ -39,8 +39,19 @@ router.post('/', requireAuth, async (req, res, next) => {
 // READ — bookings I made as a renter
 router.get('/mine', requireAuth, async (req, res, next) => {
   try {
-    const bookings = await Booking.find({ renter: req.user._id }).populate('property', 'propertyType location price images');
-    res.status(200).json(bookings);
+    const bookings = await Booking.find({ renter: req.user._id })
+      .populate('property', 'propertyType location price images ownerContactNumber')
+      .lean();
+
+    const sanitized = bookings.map((booking) => {
+      if (booking.property && booking.status !== 'accepted') {
+        const { ownerContactNumber, ...propertyWithoutNumber } = booking.property;
+        return { ...booking, property: propertyWithoutNumber };
+      }
+      return booking;
+    });
+
+    res.status(200).json(sanitized);
   } catch (error) {
     next(error);
   }

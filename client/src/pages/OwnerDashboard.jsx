@@ -342,12 +342,16 @@ function OwnerDashboard() {
                           {booking.status}
                         </span>
                       </div>
-
+                     
                       {booking.status === 'accepted' && (
-                        <p className="text-sm text-accent mt-3">
-                          Accepted! Open the listing to see the owner's contact number.
-                        </p>
-                      )}
+                    <p className="text-sm text-accent mt-3">
+                      Accepted! Contact the owner at{' '}                       
+                        <a href={`tel:${booking.property.ownerContactNumber}`}
+                        className="font-medium underline">
+                        {booking.property.ownerContactNumber}
+                           </a>
+                          </p>
+                        )}
                     </>
                   ) : (
                     <p className="text-sm text-muted">
