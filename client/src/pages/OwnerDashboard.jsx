@@ -145,10 +145,16 @@ function OwnerDashboard() {
     return dateString.slice(0, 10);
   }
 
+  function pendingCountFor(propertyId) {
+    return bookings.filter(
+      (booking) => booking.property && booking.property._id === propertyId && booking.status === 'pending'
+    ).length;
+  }
+
   //isActive compares the passed-in tab argument against the component's activeTab state — if they match, it gets underline and colored text, signaling "you're here"
   function tabClassName(tab) {
     const isActive = activeTab === tab;
-    return `px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+    return `px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors flex items-center gap-2 ${
       isActive ? 'border-brand text-brand' : 'border-transparent text-muted hover:text-ink'
     }`;
   }
@@ -189,6 +195,11 @@ function OwnerDashboard() {
         </button>
         <button onClick={() => setActiveTab('received')} className={tabClassName('received')}>
           Requests Received
+          {totalPending > 0 && (
+            <span className="bg-danger text-white text-xs rounded-full px-1.5 py-0.5 leading-none">
+              {totalPending}
+            </span>
+          )}
         </button>
         <button onClick={() => setActiveTab('bookings')} className={tabClassName('bookings')}>
           My Bookings
@@ -218,19 +229,29 @@ function OwnerDashboard() {
             </p>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {listings.map((property) => (
+              {listings.map((property) => {
+                const pending = pendingCountFor(property._id);
+                return (
                 <div key={property._id} className="border border-line rounded-lg overflow-hidden flex flex-col">
-                  {property.images && property.images.length > 0 ? (
-                    <img
-                      src={`http://localhost:5000${property.images[0]}`}
-                      alt={property.propertyType}
-                      className="w-full h-40 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-40 flex items-center justify-center bg-surface text-muted">
-                      <ImageOff size={28} />
-                    </div>
-                  )}
+                  <div className="relative">
+                    {property.images && property.images.length > 0 ? (
+                      <img
+                        src={`http://localhost:5000${property.images[0]}`}
+                        alt={property.propertyType}
+                        className="w-full h-40 object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-40 flex items-center justify-center bg-surface text-muted">
+                        <ImageOff size={28} />
+                      </div>
+                    )}
+
+                    {pending > 0 && (
+                      <span className="absolute top-2 right-2 bg-danger text-white text-xs font-medium px-2 py-1 rounded-full">
+                        {pending} pending
+                      </span>
+                    )}
+                  </div>
 
                   <div className="p-4 flex flex-col flex-1">
                     <div className="flex items-start justify-between gap-2">
@@ -270,7 +291,8 @@ function OwnerDashboard() {
                     </div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </section>
