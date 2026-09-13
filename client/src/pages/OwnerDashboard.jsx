@@ -4,6 +4,23 @@ import { Link } from 'react-router-dom';
 import { ImageOff } from 'lucide-react'
 import { useAuth } from '../context/AuthContext';
 
+function BookingThumbnail({ property }) {
+  if (property?.images?.length > 0) {
+    return (
+      <img
+        src={`http://localhost:5000${property.images[0]}`}
+        alt={property.propertyType}
+        className="w-20 h-20 object-cover rounded-md flex-shrink-0"
+      />
+    );
+  }
+  return (
+    <div className="w-20 h-20 rounded-md bg-surface flex items-center justify-center text-muted flex-shrink-0">
+      <ImageOff size={20} />
+    </div>
+  );
+}
+
 function OwnerDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('received');
@@ -308,50 +325,54 @@ function OwnerDashboard() {
           ) : (
             <div className="flex flex-col gap-4 mt-4">
               {bookings.map((booking) => (
-                <div key={booking._id} className="border border-line rounded-lg p-5">
-                  {booking.property ? (
-                <>
-                   <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <h3 className="font-semibold text-ink">
-                        {booking.property.propertyType} in {booking.property.location}
-                      </h3>
-                      <p className="text-sm text-muted mt-1">
-                        Requested by: {booking.renter.name} ({booking.renter.phone})
-                      </p>
-                      <p className="text-sm text-ink mt-1">
-                        {formatDate(booking.startDate)} to {formatDate(booking.endDate)}
-                      </p>
-                      {booking.message && (
-                        <p className="text-sm text-muted mt-1">Message: {booking.message}</p>
-                      )}
+                <div key={booking._id} className="border border-line rounded-lg p-5 flex gap-4">
+                  <BookingThumbnail property={booking.property} />
+
+                  <div className="flex-1">
+                    {booking.property ? (
+                  <>
+                     <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-semibold text-ink">
+                          {booking.property.propertyType} in {booking.property.location}
+                        </h3>
+                        <p className="text-sm text-muted mt-1">
+                          Requested by: {booking.renter.name} ({booking.renter.phone})
+                        </p>
+                        <p className="text-sm text-ink mt-1">
+                          {formatDate(booking.startDate)} to {formatDate(booking.endDate)}
+                        </p>
+                        {booking.message && (
+                          <p className="text-sm text-muted mt-1">Message: {booking.message}</p>
+                        )}
+                      </div>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}>
+                        {booking.status}
+                      </span>
                     </div>
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}>
-                      {booking.status}
-                    </span>
-                  </div>
-                  {booking.status === 'pending' && (
-                    <div className="flex gap-3 mt-4">
-                      <button
-                        onClick={() => handleStatusUpdate(booking._id, 'accepted')}
-                        className="px-4 py-1.5 rounded-md bg-accent text-white text-sm font-medium hover:opacity-90"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => handleStatusUpdate(booking._id, 'declined')}
-                        className="px-4 py-1.5 rounded-md border border-danger text-danger text-sm font-medium hover:bg-danger/10"
-                      >
-                        Decline
-                      </button>
-                    </div>
+                    {booking.status === 'pending' && (
+                      <div className="flex gap-3 mt-4">
+                        <button
+                          onClick={() => handleStatusUpdate(booking._id, 'accepted')}
+                          className="px-4 py-1.5 rounded-md bg-accent text-white text-sm font-medium hover:opacity-90"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleStatusUpdate(booking._id, 'declined')}
+                          className="px-4 py-1.5 rounded-md border border-danger text-danger text-sm font-medium hover:bg-danger/10"
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    )}
+                  </> 
+                  ) : (
+                    <p className="text-sm text-muted">
+                      Requested by: {booking.renter.name} — this listing has since been deleted.
+                    </p>
                   )}
-                </> 
-                ) : (
-    <p className="text-sm text-muted">
-      Requested by: {booking.renter.name} — this listing has since been deleted.
-    </p>
-  )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -372,41 +393,47 @@ function OwnerDashboard() {
           ) : (
             <div className="flex flex-col gap-4 mt-4">
               {myBookings.map((booking) => (
-                <div key={booking._id} className="border border-line rounded-lg p-5">
-                  {booking.property ? (
-                    <>
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h3 className="font-semibold text-ink">
-                            <Link to={`/properties/${booking.property._id}`} className="hover:text-brand">
-                              {booking.property.propertyType} in {booking.property.location}
-                            </Link>
-                          </h3>
-                          <p className="text-sm text-ink mt-1">
-                            {formatDate(booking.startDate)} to {formatDate(booking.endDate)}
-                          </p>
-                          <p className="text-sm text-muted mt-1">₹{booking.property.price}</p>
+                <div key={booking._id} className="border border-line rounded-lg p-5 flex gap-4">
+                  <BookingThumbnail property={booking.property} />
+
+                  <div className="flex-1">
+                    {booking.property ? (
+                      <>
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <h3 className="font-semibold text-ink">
+                              <Link to={`/properties/${booking.property._id}`} className="hover:text-brand">
+                                {booking.property.propertyType} in {booking.property.location}
+                              </Link>
+                            </h3>
+                            <p className="text-sm text-ink mt-1">
+                              {formatDate(booking.startDate)} to {formatDate(booking.endDate)}
+                            </p>
+                            <p className="text-sm text-muted mt-1">₹{booking.property.price}</p>
+                          </div>
+                          <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}>
+                            {booking.status}
+                          </span>
                         </div>
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}>
-                          {booking.status}
-                        </span>
-                      </div>
-                     
-                      {booking.status === 'accepted' && (
-                    <p className="text-sm text-accent mt-3">
-                      Accepted! Contact the owner at{' '}                       
-                        <a href={`tel:${booking.property.ownerContactNumber}`}
-                        className="font-medium underline">
-                        {booking.property.ownerContactNumber}
-                           </a>
+
+                        {booking.status === 'accepted' && (
+                          <p className="text-sm text-accent mt-3">
+                            Accepted! Contact the owner at{' '}
+                            <a
+                              href={`tel:${booking.property.ownerContactNumber}`}
+                              className="font-medium underline"
+                            >
+                              {booking.property.ownerContactNumber}
+                            </a>
                           </p>
                         )}
-                    </>
-                  ) : (
-                    <p className="text-sm text-muted">
-                      This listing is no longer available.
-                    </p>
-                  )}
+                      </>
+                    ) : (
+                      <p className="text-sm text-muted">
+                        This listing is no longer available.
+                      </p>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
