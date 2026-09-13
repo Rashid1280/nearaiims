@@ -21,6 +21,18 @@ router.post('/', requireAuth, async (req, res, next) => {
        return next(new AppError('You cannot book your own property', 400));
     }
 
+     const overlappingBooking = await Booking.findOne({
+      property: property._id,
+      renter: req.user._id,
+      status: { $in: ['pending', 'accepted'] },
+      startDate: { $lte: endDate },
+      endDate: { $gte: startDate },
+    });
+
+    if (overlappingBooking) {
+      return next(new AppError('You already have an active request for these dates on this property', 409));
+    }
+
     const booking = await Booking.create({
       property: property._id,
       renter: req.user._id,
