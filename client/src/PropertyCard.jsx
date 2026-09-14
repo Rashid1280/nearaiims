@@ -9,7 +9,7 @@ function PropertyCard({ property }) {
       <div className="rounded-lg border border-line bg-white overflow-hidden hover:shadow-md transition-shadow">
         {images && images.length > 0 && (
           <img
-            src={`http://localhost:5000${images[0]}`}
+            src={images[0]}
             alt={propertyType}
             className="w-full h-48 object-cover"
           />

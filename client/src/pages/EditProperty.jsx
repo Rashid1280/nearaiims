@@ -241,7 +241,7 @@ function EditProperty() {
               {existingImages.map((path) => (
                 <img
                   key={path}
-                  src={`http://localhost:5000${path}`}
+                  src={path}
                   alt=""
                   className="w-20 h-20 object-cover rounded-md border border-line"
                 />
