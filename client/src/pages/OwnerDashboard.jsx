@@ -8,7 +8,7 @@ function BookingThumbnail({ property }) {
   if (property?.images?.length > 0) {
     return (
       <img
-        src={`http://localhost:5000${property.images[0]}`}
+        src={property.images[0]}
         alt={property.propertyType}
         className="w-20 h-20 object-cover rounded-md flex-shrink-0"
       />
@@ -253,7 +253,7 @@ function OwnerDashboard() {
                   <div className="relative">
                     {property.images && property.images.length > 0 ? (
                       <img
-                        src={`http://localhost:5000${property.images[0]}`}
+                        src={property.images[0]}
                         alt={property.propertyType}
                         className="w-full h-40 object-cover"
                       />

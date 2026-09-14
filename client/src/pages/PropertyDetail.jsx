@@ -72,7 +72,7 @@ function PropertyDetail() {
             {images && images.map((img, index) => (
               <img
                 key={index}
-                src={`http://localhost:5000${img}`}
+                src={img}
                 alt={`${propertyType} photo ${index + 1}`}
                 className="w-full h-40 object-cover rounded-lg"
               />
