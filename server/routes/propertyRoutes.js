@@ -14,7 +14,7 @@ router.post('/', requireAuth, upload.array('images', 6), async (req, res, next) 
     if(!req.files || req.files.length ===0){
       return next(new AppError('At least one image is required', 400))
     }
-    const images = req.files.map((file)=> `/uploads/${file.filename}` );
+    const images =  req.files.map((file) => file.path);
     
     const property = await Property.create({
       ...req.body,
@@ -102,10 +102,9 @@ router.put('/:id', requireAuth, upload.array('images', 6), async (req, res, next
 
      Object.assign(property, req.body);
 
-      if(req.files && req.files.length >0){
-    property.images = req.files.map((file)=> `/uploads/${file.filename}`)
-     
-    }
+           if(req.files && req.files.length >0){
+             property.images = req.files.map((file) => file.path)    
+            }
    
     await property.save();
     res.status(200).json(property);
