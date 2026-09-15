@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import PropertyCard from '../PropertyCard.jsx';
 import { useSearchParams } from 'react-router-dom';
 
@@ -22,7 +22,7 @@ function Properties() {
     if (maxPrice) params.maxPrice = maxPrice;
 
     try {
-      const response = await axios.get('http://localhost:5000/api/properties', { params });
+      const response = await api.get('/api/properties', { params });
       setProperties(response.data);
     } catch (error) {
       console.error('Failed to fetch properties:', error);

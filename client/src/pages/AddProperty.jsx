@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 
 const AMENITIES = ['furnished', 'ac', 'kitchenAccess', 'parking'];
 
@@ -58,11 +58,7 @@ function AddProperty() {
 
     setSubmitting(true);
     try {
-      const response = await axios.post(
-        'http://localhost:5000/api/properties',
-        formData,
-        { withCredentials: true }
-      );
+      const response = await api.post('/api/properties', formData);
       navigate(`/properties/${response.data._id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create listing. Please try again.');

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../api/axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
 
@@ -19,7 +19,7 @@ function PropertyDetail() {
   useEffect(() => {
     async function fetchProperty() {
       try {
-        const response = await axios.get(`http://localhost:5000/api/properties/${id}`);
+        const response = await api.get(`/api/properties/${id}`);
         setProperty(response.data);
       } catch (error) {
         console.error('Failed to fetch property:', error);
@@ -41,11 +41,7 @@ function PropertyDetail() {
     setBookingError('');
 
     try {
-      await axios.post(
-        'http://localhost:5000/api/bookings',
-        { propertyId: id, startDate, endDate, message },
-        { withCredentials: true }
-      );
+      await api.post('/api/bookings', { propertyId: id, startDate, endDate, message });
       setBookingStatus('success');
       setStartDate('');
       setEndDate('');

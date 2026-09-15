@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 
 function Login() {
@@ -15,11 +15,7 @@ function Login() {
     e.preventDefault(); 
 
     try {
-      const response = await axios.post(
-        'http://localhost:5000/api/auth/login',
-        { email, password },
-        { withCredentials: true }
-      );
+      const response = await api.post('/api/auth/login', { email, password });
       setUser(response.data.user); 
       navigate('/'); 
     } catch (err) {

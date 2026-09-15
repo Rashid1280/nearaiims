@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 import { Link } from 'react-router-dom';
 import { ImageOff } from 'lucide-react'
 import { useAuth } from '../context/AuthContext';
@@ -50,10 +50,7 @@ function OwnerDashboard() {
   useEffect(() => {
     async function fetchBookings() {
       try {
-        const response = await axios.get(
-          'http://localhost:5000/api/bookings/received',
-          { withCredentials: true }
-        );
+        const response = await api.get('/api/bookings/received');
         setBookings(response.data);
       } catch (error) {
         console.error('Failed to fetch bookings:', error);
@@ -67,10 +64,7 @@ function OwnerDashboard() {
   useEffect(() => {
     async function fetchListings() {
       try {
-        const response = await axios.get(
-          'http://localhost:5000/api/properties/mine',
-          { withCredentials: true }
-        );
+        const response = await api.get('/api/properties/mine');
         const withLabels = response.data.map((property) => ({
           ...property,
           daysAgoLabel: daysAgo(property.createdAt),
@@ -88,10 +82,7 @@ function OwnerDashboard() {
   useEffect(() => {
     async function fetchMyBookings() {
       try {
-        const response = await axios.get(
-          'http://localhost:5000/api/bookings/mine',
-          { withCredentials: true }
-        );
+        const response = await api.get('/api/bookings/mine');
         setMyBookings(response.data);
       } catch (error) {
         console.error('Failed to fetch my bookings:', error);
@@ -104,7 +95,7 @@ function OwnerDashboard() {
 
   async function handleStatusUpdate(bookingId, newStatus) {
     try {
-      await axios.put(`http://localhost:5000/api/bookings/${bookingId}/status`, { status: newStatus }, { withCredentials: true });
+      await api.put(`/api/bookings/${bookingId}/status`, { status: newStatus });
       setBookings((prevBookings) =>
         prevBookings.map((booking) =>
           booking._id === bookingId ? { ...booking, status: newStatus } : booking
@@ -120,11 +111,7 @@ function OwnerDashboard() {
   async function toggleAvailability(propertyId, currentValue) {
     setListingsError('');
     try {
-      await axios.put(
-        `http://localhost:5000/api/properties/${propertyId}`,
-        { isAvailable: !currentValue },
-        { withCredentials: true }
-      );
+      await api.put(`/api/properties/${propertyId}`, { isAvailable: !currentValue });
       setListings((prev) =>
         prev.map((property) =>
           property._id === propertyId ? { ...property, isAvailable: !currentValue } : property
@@ -142,7 +129,7 @@ function OwnerDashboard() {
 
     setListingsError('');
     try {
-      await axios.delete(`http://localhost:5000/api/properties/${propertyId}`, { withCredentials: true });
+      await api.delete(`/api/properties/${propertyId}`);
       setListings((prev) => prev.filter((property) => property._id !== propertyId));
     } catch (error) {
       console.error('Failed to delete property:', error);
