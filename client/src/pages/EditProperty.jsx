@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api/axios';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const AMENITIES = ['furnished', 'ac', 'kitchenAccess', 'parking'];
@@ -32,9 +32,7 @@ function EditProperty() {
   useEffect(() => {
     async function fetchProperty() {
       try {
-        const response = await axios.get(`http://localhost:5000/api/properties/${id}`, {
-          withCredentials: true,
-        });
+        const response = await api.get(`/api/properties/${id}`);
         const property = response.data;
 
         setPropertyType(property.propertyType);
@@ -88,11 +86,7 @@ function EditProperty() {
 
     setSubmitting(true);
     try {
-      await axios.put(
-        `http://localhost:5000/api/properties/${id}`,
-        formData,
-        { withCredentials: true }
-      );
+      await api.put(`/api/properties/${id}`, formData);
       navigate(`/properties/${id}`);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to update listing. Please try again.');

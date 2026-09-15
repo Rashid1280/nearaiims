@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect, useContext  } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 const AuthContext = createContext();
 
@@ -9,7 +9,7 @@ export function AuthProvider({ children }) {
 
   // check for existing session on page load/refresh
   useEffect(() => {
-    axios.get('http://localhost:5000/api/auth/me', { withCredentials: true })
+    api.get('/api/auth/me')
       .then((response) => {
         setUser(response.data);
       })

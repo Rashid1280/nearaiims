@@ -4,7 +4,7 @@ import Home from './pages/Home.jsx';
 import Properties from './pages/Properties.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
-import axios from 'axios';
+import api from './api/axios.js';
 import { Menu, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropertyDetail from './pages/PropertyDetail.jsx'
@@ -21,7 +21,7 @@ function App() {
 
   async function handleLogout() {
     try {
-      await axios.post('http://localhost:5000/api/auth/logout', {}, { withCredentials: true });
+      await api.post('/api/auth/logout', {});
       setUser(null);
       navigate('/');
     } catch (err) {
