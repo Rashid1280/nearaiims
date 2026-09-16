@@ -54,12 +54,14 @@ router.post('/login', async (req, res, next) => {
       expiresIn: '7d',
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
 // httpOnly = frontend JS can never read this cookie,only browser can.
 res.cookie('token', token, {
-  httpOnly : true,
-  secure : true,
-  sameSite : 'none',
-  maxAge : 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
 })
 
     res.status(200).json({
@@ -72,10 +74,11 @@ res.cookie('token', token, {
 
 // LOGOUT — clears the auth cookie
 router.post('/logout', (req, res) => {
+  const isProduction = process.env.NODE_ENV === 'production';
   res.clearCookie('token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
   });
   res.status(200).json({ message: 'Logged out' });
 });
