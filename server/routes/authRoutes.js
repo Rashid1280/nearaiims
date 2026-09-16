@@ -57,8 +57,8 @@ router.post('/login', async (req, res, next) => {
 // httpOnly = frontend JS can never read this cookie,only browser can.
 res.cookie('token', token, {
   httpOnly : true,
-  secure : process.env.NODE_ENV === 'production',
-  sameSite : 'lax',
+  secure : true,
+  sameSite : 'none',
   maxAge : 7 * 24 * 60 * 60 * 1000,
 })
 
