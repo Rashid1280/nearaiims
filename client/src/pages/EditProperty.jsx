@@ -171,6 +171,7 @@ function EditProperty() {
             value={distanceFromAiimsKm}
             onChange={(e) => setDistanceFromAiimsKm(e.target.value)}
             step="0.1"
+            min="0"
             className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
           />
         </label>

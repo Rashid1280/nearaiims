@@ -26,6 +26,7 @@ const propertySchema = new mongoose.Schema(
     },
     distanceFromAiimsKm: {
       type: Number,
+      min: [0, 'Distance cannot be negative'],
     },
     priceType: {
       type: String,
