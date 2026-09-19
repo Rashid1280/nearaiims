@@ -5,7 +5,7 @@ import Properties from './pages/Properties.jsx';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import api from './api/axios.js';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import PropertyDetail from './pages/PropertyDetail.jsx'
 import OwnerDashboard from './pages/OwnerDashboard.jsx';
@@ -33,7 +33,14 @@ function App() {
     <div>
       <nav className="px-6 py-4 border-b border-line bg-white">
         <div className="flex items-center justify-between flex-wrap">
-          <Link to="/" className="font-semibold text-brand text-lg">NearAIIMS</Link>
+          <Link to="/" className="flex items-center gap-2">
+            <span className="flex items-center justify-center w-8 h-8 rounded-md bg-brand text-white">
+              <Building2 size={18} />
+            </span>
+            <span className="font-semibold text-lg">
+              <span className="text-ink">Near</span><span className="text-brand">AIIMS</span>
+            </span>
+          </Link>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
