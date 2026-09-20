@@ -118,7 +118,7 @@ The frontend runs on Vite's default port (typically `5173`) and talks to the bac
 
 ## Status
 
-Currently in active development. Backend (auth, properties, bookings, Cloudinary image storage) and frontend (auth flow, protected routes, browse/filter, property detail with booking form, full owner dashboard) are complete. Remaining work: manual QA pass and deployment.
+Currently Upgrading to add more features as i go on. Backend (auth, properties, bookings, Cloudinary image storage) and frontend (auth flow, protected routes, browse/filter, property detail with booking form, full owner dashboard) are complete.
 
 ## Known Limitations
 
