@@ -4,7 +4,6 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const cookieParser = require('cookie-parser');
 const propertyRoutes = require('./routes/propertyRoutes');
-const path = require('path');
 const bookingRoutes = require('./routes/bookingRoutes')
 const errorHandler = require('./middleware/errorHandler');
 const cors = require('cors');
@@ -19,7 +18,6 @@ app.use(cors({
 }));
 app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/bookings', bookingRoutes);
 
 
