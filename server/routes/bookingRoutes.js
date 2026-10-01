@@ -52,7 +52,7 @@ router.post('/', requireAuth, async (req, res, next) => {
 router.get('/mine', requireAuth, async (req, res, next) => {
   try {
     const bookings = await Booking.find({ renter: req.user._id })
-      .populate('property', 'propertyType location price images ownerContactNumber')
+      .populate('property', 'propertyType location pricePerNight images ownerContactNumber')
       .lean();
 
     const sanitized = bookings.map((booking) => {
@@ -72,7 +72,7 @@ router.get('/mine', requireAuth, async (req, res, next) => {
 // READ — booking requests received, for properties I own
 router.get('/received', requireAuth, async (req, res, next) => {
   try {
-    const bookings = await Booking.find({ owner: req.user._id }).populate('property', 'propertyType location price images').populate('renter', 'name phone');
+    const bookings = await Booking.find({ owner: req.user._id }).populate('property', 'propertyType location pricePerNight images').populate('renter', 'name phone');
     res.status(200).json(bookings);
   } catch (error) {
     next(error);

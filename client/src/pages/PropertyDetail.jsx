@@ -42,7 +42,7 @@ function PropertyDetail() {
     return <p className="text-center text-muted mt-12">Loading...</p>;
   }
 
-  const { propertyType, location, address, price, priceType, description, images, owner, amenities } = property;
+  const { propertyType, location, address, pricePerNight, description, images, owner, amenities } = property;
 
   async function handleBookingSubmit(e) {
     e.preventDefault();
@@ -77,7 +77,7 @@ function PropertyDetail() {
         <div className="lg:flex-1">
           <h1 className="text-2xl font-semibold text-ink">{propertyType} in {location}</h1>
           <p className="text-muted mt-1">{address}</p>
-          <p className="text-brand font-medium text-lg mt-2">₹{price} / {priceType}</p>
+          <p className="text-brand font-medium text-lg mt-2">₹{pricePerNight} / night</p>
           <p className="text-ink mt-4">{description}</p>
           <p className="text-sm text-muted mt-2">Listed by: {owner?.name}</p>
 
