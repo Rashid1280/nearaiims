@@ -15,8 +15,7 @@ function EditProperty() {
   const [location, setLocation] = useState('');
   const [address, setAddress] = useState('');
   const [distanceFromAiimsKm, setDistanceFromAiimsKm] = useState('');
-  const [priceType, setPriceType] = useState('weekly');
-  const [price, setPrice] = useState('');
+  const [pricePerNight, setPricePerNight] = useState('');
   const [amenities, setAmenities] = useState([]);
   const [ownerContactNumber, setOwnerContactNumber] = useState('');
   const [images, setImages] = useState([]); // newly selected replacement files, if any
@@ -40,8 +39,7 @@ function EditProperty() {
         setLocation(property.location);
         setAddress(property.address);
         setDistanceFromAiimsKm(property.distanceFromAiimsKm ?? '');
-        setPriceType(property.priceType);
-        setPrice(property.price);
+        setPricePerNight(property.pricePerNight);
         setAmenities(property.amenities || []);
         setOwnerContactNumber(property.ownerContactNumber || '');
         setExistingImages(property.images || []);
@@ -74,8 +72,7 @@ function EditProperty() {
     formData.append('location', location);
     formData.append('address', address);
     if (distanceFromAiimsKm) formData.append('distanceFromAiimsKm', distanceFromAiimsKm);
-    formData.append('priceType', priceType);
-    formData.append('price', price);
+    formData.append('pricePerNight', pricePerNight);
     formData.append('ownerContactNumber', ownerContactNumber);
 
     amenities.forEach((amenity) => formData.append('amenities', amenity));
@@ -176,32 +173,17 @@ function EditProperty() {
           />
         </label>
 
-        <div className="flex gap-3">
-          <label className="block flex-1">
-            <span className="text-sm text-muted">Price type</span>
-            <select
-              value={priceType}
-              onChange={(e) => setPriceType(e.target.value)}
-              className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
-            >
-              <option value="daily">Daily</option>
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-            </select>
-          </label>
-
-          <label className="block flex-1">
-            <span className="text-sm text-muted">Price (₹)</span>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-              min="0"
-              className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
-            />
-          </label>
-        </div>
+        <label className="block">
+          <span className="text-sm text-muted">Price per night (₹)</span>
+          <input
+            type="number"
+            value={pricePerNight}
+            onChange={(e) => setPricePerNight(e.target.value)}
+            required
+            min="0"
+            className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
+          />
+        </label>
 
         <div>
           <span className="text-sm text-muted">Amenities</span>
