@@ -84,7 +84,7 @@ router.post('/logout', (req, res) => {
 });
 
 //DASHBOARD AFTER LOGIN
-router.get('/me', requireAuth, async (req, res) => {
+router.get('/me', requireAuth, (req, res) => {
 
   // requireAuth already found the user and attached it to req.user -
   // nothing left to do here 

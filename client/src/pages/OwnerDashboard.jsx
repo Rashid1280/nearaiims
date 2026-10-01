@@ -270,7 +270,7 @@ function OwnerDashboard() {
                         {property.isAvailable ? 'Available' : 'Unavailable'}
                       </span>
                     </div>
-                    <p className="text-sm text-muted mt-1">₹{property.price} / {property.priceType}</p>
+                    <p className="text-sm text-muted mt-1">₹{property.pricePerNight} / night</p>
                     <p className="text-xs text-muted mt-1">{property.daysAgoLabel}</p>
 
                     <div className="flex flex-wrap gap-2 mt-auto pt-4 border-t border-line mt-3">
@@ -396,7 +396,7 @@ function OwnerDashboard() {
                             <p className="text-sm text-ink mt-1">
                               {formatDate(booking.startDate)} to {formatDate(booking.endDate)}
                             </p>
-                            <p className="text-sm text-muted mt-1">₹{booking.property.price}</p>
+                            <p className="text-sm text-muted mt-1">₹{booking.property.pricePerNight} / night</p>
                           </div>
                           <span className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}>
                             {booking.status}

@@ -28,12 +28,7 @@ const propertySchema = new mongoose.Schema(
       type: Number,
       min: [0, 'Distance cannot be negative'],
     },
-    priceType: {
-      type: String,
-      enum: ['daily', 'weekly', 'monthly'],
-      default: 'weekly',
-    },
-    price: {
+    pricePerNight: {
       type: Number,
       required: true,
       min: 0,
@@ -61,5 +56,3 @@ const propertySchema = new mongoose.Schema(
 const Property = mongoose.model('Property', propertySchema);
 
 module.exports = Property;
-
-

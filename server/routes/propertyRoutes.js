@@ -44,9 +44,9 @@ router.get('/', async (req, res, next) => {
       filter.propertyType = propertyType;
     }
     if(minPrice || maxPrice){
-      filter.price = {};
-      if(minPrice) filter.price.$gte = Number(minPrice);
-      if(maxPrice) filter.price.$lte = Number(maxPrice);
+      filter.pricePerNight = {};
+      if(minPrice) filter.pricePerNight.$gte = Number(minPrice);
+      if(maxPrice) filter.pricePerNight.$lte = Number(maxPrice);
     }
 
     const properties = await Property.find(filter).select('-ownerContactNumber');
