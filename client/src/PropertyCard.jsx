@@ -9,7 +9,7 @@ const AMENITY_LABELS = {
 
 function PropertyCard({ property }) {
   if (!property) return null;
-  const { _id, propertyType, location, address, price, priceType, images, amenities } = property;
+  const { _id, propertyType, location, address, pricePerNight, images, amenities } = property;
 
   return (
     <Link to={`/properties/${_id}`}>
@@ -24,7 +24,7 @@ function PropertyCard({ property }) {
         <div className="p-4">
           <h2 className="font-semibold text-ink">{propertyType} in {location}</h2>
           <p className="text-sm text-muted mt-1">{address}</p>
-          <p className="text-brand font-medium mt-2">₹{price} / {priceType}</p>
+          <p className="text-brand font-medium mt-2">₹{pricePerNight} / night</p>
 
           {amenities && amenities.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3">
