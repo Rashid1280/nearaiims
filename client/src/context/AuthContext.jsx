@@ -1,5 +1,5 @@
-import { createContext, useState, useEffect, useContext  } from 'react';
-import api from '../api/axios';
+import { createContext, useState, useEffect, useContext } from "react";
+import api from "../api/axios";
 
 const AuthContext = createContext();
 
@@ -9,12 +9,13 @@ export function AuthProvider({ children }) {
 
   // check for existing session on page load/refresh
   useEffect(() => {
-    api.get('/api/auth/me')
+    api
+      .get("/api/auth/me")
       .then((response) => {
         setUser(response.data);
       })
       .catch(() => {
-        setUser(null); 
+        setUser(null);
       })
       .finally(() => {
         setLoading(false);
@@ -23,11 +24,7 @@ export function AuthProvider({ children }) {
 
   const value = { user, setUser, loading };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

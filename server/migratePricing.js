@@ -13,10 +13,10 @@
 // this should never silently run against whatever MONGO_URI happens to
 // already be configured. Pass the exact database you mean to touch.
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const uri = process.argv[2];
-const apply = process.argv.includes('--apply');
+const apply = process.argv.includes("--apply");
 
 if (!uri) {
   console.error('Usage: node migratePricing.js "<mongo-uri>" [--apply]');
@@ -24,26 +24,32 @@ if (!uri) {
 }
 
 function nightlyRateFrom(price, priceType) {
-  if (priceType === 'weekly') return Math.round(price / 7);
-  if (priceType === 'monthly') return Math.round(price / 30);
+  if (priceType === "weekly") return Math.round(price / 7);
+  if (priceType === "monthly") return Math.round(price / 30);
   return price; // 'daily', or already per-night
 }
 
 async function run() {
   await mongoose.connect(uri);
-  console.log(`Connected. Mode: ${apply ? 'APPLY (will write)' : 'DRY RUN (no writes)'}`);
+  console.log(
+    `Connected. Mode: ${apply ? "APPLY (will write)" : "DRY RUN (no writes)"}`,
+  );
 
   // raw driver access on purpose, not the Property model - the current
   // Mongoose schema no longer declares price/priceType, so a normal
   // Property.find() would hide them even though Mongo still has them.
   // Going through the native collection bypasses that and sees the
   // documents exactly as they really are in the database.
-  const collection = mongoose.connection.collection('properties');
+  const collection = mongoose.connection.collection("properties");
 
-  const stale = await collection.find({ pricePerNight: { $exists: false } }).toArray();
+  const stale = await collection
+    .find({ pricePerNight: { $exists: false } })
+    .toArray();
 
   if (stale.length === 0) {
-    console.log('Nothing to migrate - every document already has pricePerNight.');
+    console.log(
+      "Nothing to migrate - every document already has pricePerNight.",
+    );
   } else {
     console.log(`Found ${stale.length} document(s) still on the old fields:\n`);
 
@@ -51,13 +57,16 @@ async function run() {
       const nightly = nightlyRateFrom(doc.price, doc.priceType);
       console.log(
         `  ${doc._id}  "${doc.propertyType} in ${doc.location}"  ` +
-        `${doc.price} (${doc.priceType}) -> pricePerNight: ${nightly}`
+          `${doc.price} (${doc.priceType}) -> pricePerNight: ${nightly}`,
       );
 
       if (apply) {
         await collection.updateOne(
           { _id: doc._id },
-          { $set: { pricePerNight: nightly }, $unset: { price: '', priceType: '' } }
+          {
+            $set: { pricePerNight: nightly },
+            $unset: { price: "", priceType: "" },
+          },
         );
       }
     }
@@ -65,7 +74,7 @@ async function run() {
     console.log(
       apply
         ? `\nDone - ${stale.length} document(s) updated.`
-        : `\nDry run only, nothing written. Review the numbers above, then re-run with --apply.`
+        : `\nDry run only, nothing written. Review the numbers above, then re-run with --apply.`,
     );
   }
 
@@ -73,6 +82,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  console.error('Migration failed:', err);
+  console.error("Migration failed:", err);
   process.exit(1);
 });

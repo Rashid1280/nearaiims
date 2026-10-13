@@ -1,15 +1,23 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const propertySchema = new mongoose.Schema(
   {
     owner: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
     propertyType: {
       type: String,
-      enum :["Room", "1 RK", "1 BHK", "2 BHK", "3 BHK", "Independent House", "PG"],
+      enum: [
+        "Room",
+        "1 RK",
+        "1 BHK",
+        "2 BHK",
+        "3 BHK",
+        "Independent House",
+        "PG",
+      ],
       required: true,
     },
     description: {
@@ -26,7 +34,7 @@ const propertySchema = new mongoose.Schema(
     },
     distanceFromAiimsKm: {
       type: Number,
-      min: [0, 'Distance cannot be negative'],
+      min: [0, "Distance cannot be negative"],
     },
     pricePerNight: {
       type: Number,
@@ -34,8 +42,8 @@ const propertySchema = new mongoose.Schema(
       min: 0,
     },
     amenities: {
-     type: [String],
-     enum: ['furnished', 'ac', 'kitchenAccess', 'parking'],
+      type: [String],
+      enum: ["furnished", "ac", "kitchenAccess", "parking"],
     },
     ownerContactNumber: {
       type: String,
@@ -50,9 +58,9 @@ const propertySchema = new mongoose.Schema(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const Property = mongoose.model('Property', propertySchema);
+const Property = mongoose.model("Property", propertySchema);
 
 module.exports = Property;

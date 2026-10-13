@@ -1,27 +1,32 @@
 import { useState, useEffect } from "react";
 import api from "../api/axios";
 import { useParams } from "react-router-dom";
-import { useAuth } from '../context/AuthContext';
-import { Sofa, Snowflake, UtensilsCrossed, ParkingCircle, CheckCircle2 } from 'lucide-react';
+import { useAuth } from "../context/AuthContext";
+import {
+  Sofa,
+  Snowflake,
+  UtensilsCrossed,
+  ParkingCircle,
+  CheckCircle2,
+} from "lucide-react";
 
 const AMENITY_DISPLAY = {
-  furnished: { label: 'Furnished', Icon: Sofa },
-  ac: { label: 'AC', Icon: Snowflake },
-  kitchenAccess: { label: 'Kitchen access', Icon: UtensilsCrossed },
-  parking: { label: 'Parking', Icon: ParkingCircle },
+  furnished: { label: "Furnished", Icon: Sofa },
+  ac: { label: "AC", Icon: Snowflake },
+  kitchenAccess: { label: "Kitchen access", Icon: UtensilsCrossed },
+  parking: { label: "Parking", Icon: ParkingCircle },
 };
 
 function PropertyDetail() {
-
   const { id } = useParams();
   const [property, setProperty] = useState(null);
 
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [message, setMessage] = useState('');
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [bookingStatus, setBookingStatus] = useState('');
-  const [bookingError, setBookingError] = useState('');
+  const [bookingStatus, setBookingStatus] = useState("");
+  const [bookingError, setBookingError] = useState("");
 
   const { user } = useAuth();
 
@@ -31,7 +36,7 @@ function PropertyDetail() {
         const response = await api.get(`/api/properties/${id}`);
         setProperty(response.data);
       } catch (error) {
-        console.error('Failed to fetch property:', error);
+        console.error("Failed to fetch property:", error);
       }
     }
 
@@ -42,22 +47,39 @@ function PropertyDetail() {
     return <p className="text-center text-muted mt-12">Loading...</p>;
   }
 
-  const { propertyType, location, address, pricePerNight, description, images, owner, amenities } = property;
+  const {
+    propertyType,
+    location,
+    address,
+    pricePerNight,
+    description,
+    images,
+    owner,
+    amenities,
+  } = property;
 
   async function handleBookingSubmit(e) {
     e.preventDefault();
-    setBookingError('');
+    setBookingError("");
     setSubmitting(true);
 
     try {
-      await api.post('/api/bookings', { propertyId: id, startDate, endDate, message });
-      setBookingStatus('success');
-      setStartDate('');
-      setEndDate('');
-      setMessage('');
+      await api.post("/api/bookings", {
+        propertyId: id,
+        startDate,
+        endDate,
+        message,
+      });
+      setBookingStatus("success");
+      setStartDate("");
+      setEndDate("");
+      setMessage("");
     } catch (error) {
-      setBookingError(error.response?.data?.message || 'Something went wrong. Please try again.');
-      setBookingStatus('error');
+      setBookingError(
+        error.response?.data?.message ||
+          "Something went wrong. Please try again.",
+      );
+      setBookingStatus("error");
     } finally {
       setSubmitting(false);
     }
@@ -65,19 +87,22 @@ function PropertyDetail() {
 
   // brings the form back after a successful request
   function handleRequestAnother() {
-    setBookingStatus('');
-    setBookingError('');
+    setBookingStatus("");
+    setBookingError("");
   }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       <div className="lg:flex lg:gap-10">
-
         {/* ---- left column: property info + gallery, grows to fill remaining space ---- */}
         <div className="lg:flex-1">
-          <h1 className="text-2xl font-semibold text-ink">{propertyType} in {location}</h1>
+          <h1 className="text-2xl font-semibold text-ink">
+            {propertyType} in {location}
+          </h1>
           <p className="text-muted mt-1">{address}</p>
-          <p className="text-brand font-medium text-lg mt-2">₹{pricePerNight} / night</p>
+          <p className="text-brand font-medium text-lg mt-2">
+            ₹{pricePerNight} / night
+          </p>
           <p className="text-ink mt-4">{description}</p>
           <p className="text-sm text-muted mt-2">Listed by: {owner?.name}</p>
 
@@ -103,27 +128,30 @@ function PropertyDetail() {
           )}
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
-            {images && images.map((img, index) => (
-              <img
-                key={index}
-                src={img}
-                alt={`${propertyType} photo ${index + 1}`}
-                className="w-full h-40 object-cover rounded-lg"
-              />
-            ))}
+            {images &&
+              images.map((img, index) => (
+                <img
+                  key={index}
+                  src={img}
+                  alt={`${propertyType} photo ${index + 1}`}
+                  className="w-full h-40 object-cover rounded-lg"
+                />
+              ))}
           </div>
         </div>
 
         {/* ---- right column: booking form, fixed width, stays visible while scrolling ---- */}
         {user && owner && user.id !== owner._id && (
           <div className="mt-8 lg:mt-0 lg:w-80 lg:shrink-0 border border-line rounded-lg p-6 h-fit lg:sticky lg:top-6">
-
-            {bookingStatus === 'success' ? (
+            {bookingStatus === "success" ? (
               <div className="text-center py-4">
                 <CheckCircle2 size={40} className="text-accent mx-auto" />
-                <h2 className="font-semibold text-ink text-lg mt-3">Request sent!</h2>
+                <h2 className="font-semibold text-ink text-lg mt-3">
+                  Request sent!
+                </h2>
                 <p className="text-sm text-muted mt-2">
-                  The owner has been notified. You'll see the status of this request under My Bookings.
+                  The owner has been notified. You'll see the status of this
+                  request under My Bookings.
                 </p>
                 <button
                   onClick={handleRequestAnother}
@@ -159,7 +187,9 @@ function PropertyDetail() {
                 </label>
 
                 <label className="block mb-4">
-                  <span className="text-sm text-muted">Message to owner (optional)</span>
+                  <span className="text-sm text-muted">
+                    Message to owner (optional)
+                  </span>
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
@@ -174,16 +204,16 @@ function PropertyDetail() {
                   disabled={submitting}
                   className="w-full px-5 py-2 rounded-md bg-accent text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
-                  {submitting ? 'Sending request...' : 'Request to Book'}
+                  {submitting ? "Sending request..." : "Request to Book"}
                 </button>
 
-                {bookingStatus === 'error' && <p className="text-danger text-sm mt-3">{bookingError}</p>}
+                {bookingStatus === "error" && (
+                  <p className="text-danger text-sm mt-3">{bookingError}</p>
+                )}
               </form>
             )}
-
           </div>
         )}
-
       </div>
     </div>
   );

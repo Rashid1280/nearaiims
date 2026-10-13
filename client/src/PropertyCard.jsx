@@ -1,15 +1,23 @@
 import { Link } from "react-router-dom";
 
 const AMENITY_LABELS = {
-  furnished: 'Furnished',
-  ac: 'AC',
-  kitchenAccess: 'Kitchen access',
-  parking: 'Parking',
+  furnished: "Furnished",
+  ac: "AC",
+  kitchenAccess: "Kitchen access",
+  parking: "Parking",
 };
 
 function PropertyCard({ property }) {
   if (!property) return null;
-  const { _id, propertyType, location, address, pricePerNight, images, amenities } = property;
+  const {
+    _id,
+    propertyType,
+    location,
+    address,
+    pricePerNight,
+    images,
+    amenities,
+  } = property;
 
   return (
     <Link to={`/properties/${_id}`}>
@@ -22,9 +30,13 @@ function PropertyCard({ property }) {
           />
         )}
         <div className="p-4">
-          <h2 className="font-semibold text-ink">{propertyType} in {location}</h2>
+          <h2 className="font-semibold text-ink">
+            {propertyType} in {location}
+          </h2>
           <p className="text-sm text-muted mt-1">{address}</p>
-          <p className="text-brand font-medium mt-2">₹{pricePerNight} / night</p>
+          <p className="text-brand font-medium mt-2">
+            ₹{pricePerNight} / night
+          </p>
 
           {amenities && amenities.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-3">

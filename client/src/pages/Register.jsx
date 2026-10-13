@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
 function Register() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [error, setError] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
@@ -15,12 +15,15 @@ function Register() {
     e.preventDefault();
 
     try {
-      await api.post('/api/auth/register', {
-        name, email, password, phone,
+      await api.post("/api/auth/register", {
+        name,
+        email,
+        password,
+        phone,
       });
-      navigate('/login');
+      navigate("/login");
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      setError(err.response?.data?.message || "Registration failed");
     }
   }
 
@@ -28,7 +31,10 @@ function Register() {
     <div className="max-w-sm mx-auto px-6 py-16">
       <h1 className="text-2xl font-semibold text-ink text-center">Register</h1>
 
-      <form onSubmit={handleSubmit} className="mt-8 border border-line rounded-lg p-6 flex flex-col gap-3">
+      <form
+        onSubmit={handleSubmit}
+        className="mt-8 border border-line rounded-lg p-6 flex flex-col gap-3"
+      >
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
