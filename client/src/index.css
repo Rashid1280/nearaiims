@@ -10,7 +10,7 @@
   --color-muted: #5b7280;
   --color-line: #dbe4ea;
 
-  --font-sans: 'Segoe UI', system-ui, sans-serif;
+  --font-sans: "Segoe UI", system-ui, sans-serif;
 }
 
 @layer base {
@@ -21,7 +21,9 @@
     margin: 0;
   }
 
-  h1, h2, h3 {
+  h1,
+  h2,
+  h3 {
     font-weight: 600;
     color: var(--color-ink);
   }

@@ -1,17 +1,19 @@
-import { useState, useEffect } from 'react';
-import api from '../api/axios';
-import PropertyCard from '../PropertyCard.jsx';
-import { useSearchParams } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import api from "../api/axios";
+import PropertyCard from "../PropertyCard.jsx";
+import { useSearchParams } from "react-router-dom";
 
 function Properties() {
   const [searchParams] = useSearchParams();
 
   const [properties, setProperties] = useState([]);
 
-  const [location, setLocation] = useState(searchParams.get('location') || '');
-  const [propertyType, setPropertyType] = useState(searchParams.get('propertyType') || '');
-  const [minPrice, setMinPrice] = useState(searchParams.get('minPrice') || '');
-  const [maxPrice, setMaxPrice] = useState(searchParams.get('maxPrice') || '');
+  const [location, setLocation] = useState(searchParams.get("location") || "");
+  const [propertyType, setPropertyType] = useState(
+    searchParams.get("propertyType") || "",
+  );
+  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") || "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") || "");
 
   // builds the filter object and asks the backend for matching properties
   async function fetchProperties() {
@@ -22,10 +24,10 @@ function Properties() {
     if (maxPrice) params.maxPrice = maxPrice;
 
     try {
-      const response = await api.get('/api/properties', { params });
+      const response = await api.get("/api/properties", { params });
       setProperties(response.data);
     } catch (error) {
-      console.error('Failed to fetch properties:', error);
+      console.error("Failed to fetch properties:", error);
     }
   }
 

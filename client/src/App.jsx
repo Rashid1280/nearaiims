@@ -1,18 +1,18 @@
-import { Routes, Route, Link } from 'react-router-dom';
-import { useAuth } from './context/AuthContext.jsx';
-import Home from './pages/Home.jsx';
-import Properties from './pages/Properties.jsx';
-import Login from './pages/Login.jsx';
-import Register from './pages/Register.jsx';
-import api from './api/axios.js';
-import { Menu, X, Building2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import PropertyDetail from './pages/PropertyDetail.jsx'
-import OwnerDashboard from './pages/OwnerDashboard.jsx';
-import ProtectedRoute from './components/ProtectedRoute.jsx';
-import { useState } from 'react';
-import AddProperty from './pages/AddProperty.jsx';
-import EditProperty from './pages/EditProperty.jsx';
+import { Routes, Route, Link } from "react-router-dom";
+import { useAuth } from "./context/AuthContext.jsx";
+import Home from "./pages/Home.jsx";
+import Properties from "./pages/Properties.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import api from "./api/axios.js";
+import { Menu, X, Building2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import PropertyDetail from "./pages/PropertyDetail.jsx";
+import OwnerDashboard from "./pages/OwnerDashboard.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import { useState } from "react";
+import AddProperty from "./pages/AddProperty.jsx";
+import EditProperty from "./pages/EditProperty.jsx";
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -21,11 +21,11 @@ function App() {
 
   async function handleLogout() {
     try {
-      await api.post('/api/auth/logout', {});
+      await api.post("/api/auth/logout", {});
       setUser(null);
-      navigate('/');
+      navigate("/");
     } catch (err) {
-      console.error('Logout failed:', err);
+      console.error("Logout failed:", err);
     }
   }
 
@@ -38,33 +38,46 @@ function App() {
               <Building2 size={18} />
             </span>
             <span className="font-semibold text-lg">
-              <span className="text-ink">Near</span><span className="text-brand">AIIMS</span>
+              <span className="text-ink">Near</span>
+              <span className="text-brand">AIIMS</span>
             </span>
           </Link>
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
             className="md:hidden text-ink"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
             {menuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
           <div
-            className={`${menuOpen ? 'flex' : 'hidden'} w-full flex-col gap-3 mt-4
+            className={`${menuOpen ? "flex" : "hidden"} w-full flex-col gap-3 mt-4
                         md:flex md:w-auto md:flex-row md:items-center md:gap-6 md:mt-0`}
           >
-            <Link to="/properties" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+            <Link
+              to="/properties"
+              onClick={() => setMenuOpen(false)}
+              className="text-ink hover:text-brand"
+            >
               Properties
             </Link>
 
             {user && (
-              <Link to="/add-property" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+              <Link
+                to="/add-property"
+                onClick={() => setMenuOpen(false)}
+                className="text-ink hover:text-brand"
+              >
                 List a property
               </Link>
             )}
             {user && (
-              <Link to="/dashboard" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+              <Link
+                to="/dashboard"
+                onClick={() => setMenuOpen(false)}
+                className="text-ink hover:text-brand"
+              >
                 My Dashboard
               </Link>
             )}
@@ -72,21 +85,34 @@ function App() {
             {loading ? (
               <span className="text-sm text-muted">Checking session...</span>
             ) : user ? (
-              <span className="text-sm text-muted">Logged in as {user.name}</span>
+              <span className="text-sm text-muted">
+                Logged in as {user.name}
+              </span>
             ) : (
               <>
-                <Link to="/login" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                <Link
+                  to="/login"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-ink hover:text-brand"
+                >
                   Login
                 </Link>
-                <Link to="/register" onClick={() => setMenuOpen(false)} className="text-ink hover:text-brand">
+                <Link
+                  to="/register"
+                  onClick={() => setMenuOpen(false)}
+                  className="text-ink hover:text-brand"
+                >
                   Register
                 </Link>
               </>
             )}
-            
+
             {user && (
               <button
-                onClick={() => { setMenuOpen(false); handleLogout(); }}
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
                 className="px-3 py-1.5 rounded-md bg-brand text-white text-sm hover:bg-brand-dark"
               >
                 Logout
@@ -101,10 +127,32 @@ function App() {
         <Route path="/properties" element={<Properties />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path='/properties/:id' element={<PropertyDetail/>}/>
-        <Route path='/dashboard' element={ <ProtectedRoute> <OwnerDashboard /> </ProtectedRoute>}/>
-        <Route path="/add-property" element={<ProtectedRoute><AddProperty /></ProtectedRoute>} />
-        <Route path="/edit-property/:id" element={<ProtectedRoute><EditProperty /></ProtectedRoute>} />
+        <Route path="/properties/:id" element={<PropertyDetail />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              {" "}
+              <OwnerDashboard />{" "}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-property"
+          element={
+            <ProtectedRoute>
+              <AddProperty />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit-property/:id"
+          element={
+            <ProtectedRoute>
+              <EditProperty />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </div>
   );

@@ -1,55 +1,60 @@
-const express = require('express');
-const Property = require('../models/Property');
-const { requireAuth } = require('../middleware/auth');
-const upload = require('../middleware/upload');
-const AppError = require('../utils/AppError');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const Property = require("../models/Property");
+const { requireAuth } = require("../middleware/auth");
+const upload = require("../middleware/upload");
+const AppError = require("../utils/AppError");
+const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
 // CREATE — must be logged in
-router.post('/', requireAuth, upload.array('images', 6), async (req, res, next) => {
-  try {
+router.post(
+  "/",
+  requireAuth,
+  upload.array("images", 6),
+  async (req, res, next) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return next(new AppError("At least one image is required", 400));
+      }
+      const images = req.files.map((file) => file.path);
 
-    if(!req.files || req.files.length ===0){
-      return next(new AppError('At least one image is required', 400))
+      const property = await Property.create({
+        ...req.body,
+        images,
+        owner: req.user._id,
+      });
+      res.status(201).json(property);
+    } catch (error) {
+      next(error);
     }
-    const images =  req.files.map((file) => file.path);
-    
-    const property = await Property.create({
-      ...req.body,
-      images,
-      owner: req.user._id,
-    });
-    res.status(201).json(property);
-  } catch (error) {
-    next(error);
-  }
-});
+  },
+);
 
 // READ — all properties, public, no login needed
-router.get('/', async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
-
-    const {location, propertyType, minPrice, maxPrice} = req.query;
+    const { location, propertyType, minPrice, maxPrice } = req.query;
 
     // filter object - late query parameters will also be added as key vaule pairs
-    const filter = {isAvailable : true};
+    const filter = { isAvailable: true };
 
     // partial, case-insensitive location match
-    if(location){
-      filter.location = {$regex : location, $options : 'i'}
+    if (location) {
+      filter.location = { $regex: location, $options: "i" };
     }
-    if(propertyType){
+    if (propertyType) {
       filter.propertyType = propertyType;
     }
-    if(minPrice || maxPrice){
+    if (minPrice || maxPrice) {
       filter.pricePerNight = {};
-      if(minPrice) filter.pricePerNight.$gte = Number(minPrice);
-      if(maxPrice) filter.pricePerNight.$lte = Number(maxPrice);
+      if (minPrice) filter.pricePerNight.$gte = Number(minPrice);
+      if (maxPrice) filter.pricePerNight.$lte = Number(maxPrice);
     }
 
-    const properties = await Property.find(filter).select('-ownerContactNumber');
+    const properties = await Property.find(filter).select(
+      "-ownerContactNumber",
+    );
     res.status(200).json(properties);
   } catch (error) {
     next(error);
@@ -57,7 +62,7 @@ router.get('/', async (req, res, next) => {
 });
 
 // READ — only the logged-in user's own listings, regardless of availability
-router.get('/mine', requireAuth, async (req, res, next) => {
+router.get("/mine", requireAuth, async (req, res, next) => {
   try {
     const properties = await Property.find({ owner: req.user._id });
     res.status(200).json(properties);
@@ -67,9 +72,11 @@ router.get('/mine', requireAuth, async (req, res, next) => {
 });
 
 // READ — one property, public, with owner's info populated
-router.get('/:id', async (req, res, next) => {
-  const property = await Property.findById(req.params.id).populate('owner', 'name').lean();
-  if (!property) return next(new AppError('Property not found', 404));
+router.get("/:id", async (req, res, next) => {
+  const property = await Property.findById(req.params.id)
+    .populate("owner", "name")
+    .lean();
+  if (!property) return next(new AppError("Property not found", 404));
 
   let isOwner = false;
   const token = req.cookies.token;
@@ -89,43 +96,47 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // UPDATE — must be logged in AND must own this specific property
-router.put('/:id', requireAuth, upload.array('images', 6), async (req, res, next) => {
-  try {
+router.put(
+  "/:id",
+  requireAuth,
+  upload.array("images", 6),
+  async (req, res, next) => {
+    try {
+      const property = await Property.findById(req.params.id);
+      if (!property) {
+        return next(new AppError("Property not found", 404));
+      }
+      if (String(property.owner) !== String(req.user._id)) {
+        return next(new AppError("You can only edit your own listings", 403));
+      }
 
-    const property = await Property.findById(req.params.id);
-    if (!property) {
-      return next(new AppError('Property not found',404))
+      Object.assign(property, req.body);
+
+      if (req.files && req.files.length > 0) {
+        property.images = req.files.map((file) => file.path);
+      }
+
+      await property.save();
+      res.status(200).json(property);
+    } catch (error) {
+      next(error);
     }
-    if (String(property.owner) !== String(req.user._id)) {
-      return next(new AppError('You can only edit your own listings',403))
-    }
-
-     Object.assign(property, req.body);
-
-           if(req.files && req.files.length >0){
-             property.images = req.files.map((file) => file.path)    
-            }
-   
-    await property.save();
-    res.status(200).json(property);
-  } catch (error) {
-    next(error);
-  }
-});
+  },
+);
 
 // DELETE — same ownership rule as update
-router.delete('/:id', requireAuth, async (req, res, next) => {
+router.delete("/:id", requireAuth, async (req, res, next) => {
   try {
     const property = await Property.findById(req.params.id);
     if (!property) {
-      return next(new AppError('Property not found',404))
+      return next(new AppError("Property not found", 404));
     }
     if (String(property.owner) !== String(req.user._id)) {
-      return next(new AppError('You can only delete your own listings',403))
+      return next(new AppError("You can only delete your own listings", 403));
     }
 
     await property.deleteOne();
-    res.status(200).json({ message: 'Property deleted' });
+    res.status(200).json({ message: "Property deleted" });
   } catch (error) {
     next(error);
   }

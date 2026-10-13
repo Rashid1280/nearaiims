@@ -51,10 +51,10 @@ Near-AIIMS-Fresh/
 ├── utils/ # AppError class
 └── seed.js # Populates the database with test users, properties, and bookings
 
-
 ## Setup
 
 ### Prerequisites
+
 - Node.js installed
 - A MongoDB Atlas connection string (or local MongoDB instance)
 - A Cloudinary account (free tier is sufficient) — needed for image uploads
@@ -76,13 +76,14 @@ CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
-
 Run the server:
+
 ```bash
 npm run dev
 ```
 
 Optionally, populate the database with test data (creates sample users, properties with real Cloudinary-hosted images, and bookings across every status):
+
 ```bash
 npm run seed
 ```
@@ -99,22 +100,22 @@ The frontend runs on Vite's default port (typically `5173`) and talks to the bac
 
 ## API Overview
 
-| Method | Route | Description | Auth required |
-|---|---|---|---|
-| POST | `/api/auth/register` | Create a new user | No |
-| POST | `/api/auth/login` | Log in, sets auth cookie | No |
-| POST | `/api/auth/logout` | Log out, clears auth cookie | No |
-| GET | `/api/auth/me` | Get current logged-in user | Yes |
-| GET | `/api/properties` | List properties, supports filters | No |
-| GET | `/api/properties/mine` | List the logged-in user's own listings | Yes |
-| GET | `/api/properties/:id` | Get one property (owner's contact number included only if the requester is that property's owner) |No |
-| POST | `/api/properties` | Create a property listing | Yes |
-| PUT | `/api/properties/:id` | Update a listing (owner only) | Yes |
-| DELETE | `/api/properties/:id` | Delete a listing (owner only) | Yes |
-| POST | `/api/bookings` | Request a booking | Yes |
-| GET | `/api/bookings/mine` | Bookings made as a renter (owner's contact number included only for accepted bookings) | Yes |
-| GET | `/api/bookings/received` | Booking requests received as an owner | Yes |
-| PUT | `/api/bookings/:id/status` | Accept/decline a booking (owner only) | Yes |
+| Method | Route                      | Description                                                                                       | Auth required |
+| ------ | -------------------------- | ------------------------------------------------------------------------------------------------- | ------------- |
+| POST   | `/api/auth/register`       | Create a new user                                                                                 | No            |
+| POST   | `/api/auth/login`          | Log in, sets auth cookie                                                                          | No            |
+| POST   | `/api/auth/logout`         | Log out, clears auth cookie                                                                       | No            |
+| GET    | `/api/auth/me`             | Get current logged-in user                                                                        | Yes           |
+| GET    | `/api/properties`          | List properties, supports filters                                                                 | No            |
+| GET    | `/api/properties/mine`     | List the logged-in user's own listings                                                            | Yes           |
+| GET    | `/api/properties/:id`      | Get one property (owner's contact number included only if the requester is that property's owner) | No            |
+| POST   | `/api/properties`          | Create a property listing                                                                         | Yes           |
+| PUT    | `/api/properties/:id`      | Update a listing (owner only)                                                                     | Yes           |
+| DELETE | `/api/properties/:id`      | Delete a listing (owner only)                                                                     | Yes           |
+| POST   | `/api/bookings`            | Request a booking                                                                                 | Yes           |
+| GET    | `/api/bookings/mine`       | Bookings made as a renter (owner's contact number included only for accepted bookings)            | Yes           |
+| GET    | `/api/bookings/received`   | Booking requests received as an owner                                                             | Yes           |
+| PUT    | `/api/bookings/:id/status` | Accept/decline a booking (owner only)                                                             | Yes           |
 
 ## Status
 
