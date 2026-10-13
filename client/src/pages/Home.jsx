@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import heroImage from '../assets/hero.png';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import heroImage from "../assets/hero.png";
 
 function Home() {
   const navigate = useNavigate();
 
-  const [location, setLocation] = useState('');
-  const [propertyType, setPropertyType] = useState('');
-  const [minPrice, setMinPrice] = useState('');
-  const [maxPrice, setMaxPrice] = useState('');
+  const [location, setLocation] = useState("");
+  const [propertyType, setPropertyType] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   // builds a query string from whatever filters were filled in, then sends
   // the user to the results page with those filters attached to the URL
@@ -16,10 +16,10 @@ function Home() {
     e.preventDefault();
 
     const params = new URLSearchParams();
-    if (location) params.set('location', location);
-    if (propertyType) params.set('propertyType', propertyType);
-    if (minPrice) params.set('minPrice', minPrice);
-    if (maxPrice) params.set('maxPrice', maxPrice);
+    if (location) params.set("location", location);
+    if (propertyType) params.set("propertyType", propertyType);
+    if (minPrice) params.set("minPrice", minPrice);
+    if (maxPrice) params.set("maxPrice", maxPrice);
 
     navigate(`/properties?${params.toString()}`);
   }
@@ -27,7 +27,6 @@ function Home() {
   return (
     <section className="w-full">
       <div className="flex flex-col md:flex-row md:items-center">
-
         {/* text half - keeps normal page padding, same left inset as the nav bar */}
         <div className="md:w-1/2 px-6 py-12 md:py-0 text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-semibold text-ink leading-tight">
@@ -97,7 +96,6 @@ function Home() {
             className="w-full h-64 md:h-[520px] object-cover"
           />
         </div>
-
       </div>
     </section>
   );

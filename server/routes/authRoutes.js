@@ -1,22 +1,23 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const { requireAuth } = require('../middleware/auth'); 
-const AppError = require('../utils/AppError');
-
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const User = require("../models/User");
+const jwt = require("jsonwebtoken");
+const { requireAuth } = require("../middleware/auth");
+const AppError = require("../utils/AppError");
 
 const router = express.Router();
 
 //REGISTER A USER
-router.post('/register', async (req, res, next) => {
+router.post("/register", async (req, res, next) => {
   try {
     const { name, email, password, phone } = req.body;
-    
+
     // check for a duplicate first so we can return a clean, specific message instead of letting MongoDB throw its own duplicate-key error
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return next(new AppError('An account with that email already exists',409));
+      return next(
+        new AppError("An account with that email already exists", 409),
+      );
     }
 
     // 10 salt rounds - increase in rounds also increase security but speed gets slower
@@ -30,39 +31,38 @@ router.post('/register', async (req, res, next) => {
       email: user.email,
     });
   } catch (error) {
-      next(error);
+    next(error);
   }
 });
 
-
 //LOGIN A USER
-router.post('/login', async (req, res, next) => {
+router.post("/login", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
     if (!user) {
-      return next(new AppError('Invalid email or password',401));
+      return next(new AppError("Invalid email or password", 401));
     }
 
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      return next(new AppError('Invalid email or password',401));
+      return next(new AppError("Invalid email or password", 401));
     }
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: '7d',
+      expiresIn: "7d",
     });
 
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === "production";
 
-// httpOnly = frontend JS can never read this cookie,only browser can.
-res.cookie('token', token, {
+    // httpOnly = frontend JS can never read this cookie,only browser can.
+    res.cookie("token", token, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
-})
+    });
 
     res.status(200).json({
       user: { id: user._id, name: user.name, email: user.email },
@@ -73,21 +73,20 @@ res.cookie('token', token, {
 });
 
 // LOGOUT — clears the auth cookie
-router.post('/logout', (req, res) => {
-  const isProduction = process.env.NODE_ENV === 'production';
-  res.clearCookie('token', {
+router.post("/logout", (req, res) => {
+  const isProduction = process.env.NODE_ENV === "production";
+  res.clearCookie("token", {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? 'none' : 'lax',
+    sameSite: isProduction ? "none" : "lax",
   });
-  res.status(200).json({ message: 'Logged out' });
+  res.status(200).json({ message: "Logged out" });
 });
 
 //DASHBOARD AFTER LOGIN
-router.get('/me', requireAuth, (req, res) => {
-
+router.get("/me", requireAuth, (req, res) => {
   // requireAuth already found the user and attached it to req.user -
-  // nothing left to do here 
+  // nothing left to do here
   res.status(200).json({
     id: req.user._id,
     name: req.user.name,
