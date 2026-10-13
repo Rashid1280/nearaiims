@@ -1,23 +1,23 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
-const AMENITIES = ['furnished', 'ac', 'kitchenAccess', 'parking'];
+const AMENITIES = ["furnished", "ac", "kitchenAccess", "parking"];
 
 function AddProperty() {
   const navigate = useNavigate();
 
-  const [propertyType, setPropertyType] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [address, setAddress] = useState('');
-  const [distanceFromAiimsKm, setDistanceFromAiimsKm] = useState('');
-  const [pricePerNight, setPricePerNight] = useState('');
+  const [propertyType, setPropertyType] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
+  const [distanceFromAiimsKm, setDistanceFromAiimsKm] = useState("");
+  const [pricePerNight, setPricePerNight] = useState("");
   const [amenities, setAmenities] = useState([]);
-  const [ownerContactNumber, setOwnerContactNumber] = useState('');
+  const [ownerContactNumber, setOwnerContactNumber] = useState("");
   const [images, setImages] = useState([]);
 
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // adds or removes one amenity from the array, depending on whether it's already selected
@@ -25,41 +25,45 @@ function AddProperty() {
     setAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((a) => a !== amenity)
-        : [...prev, amenity]
+        : [...prev, amenity],
     );
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (images.length === 0) {
-      setError('Please select at least one image.');
+      setError("Please select at least one image.");
       return;
     }
 
     // FormData, not a plain object - required whenever a request includes real files
     const formData = new FormData();
-    formData.append('propertyType', propertyType);
-    formData.append('description', description);
-    formData.append('location', location);
-    formData.append('address', address);
-    if (distanceFromAiimsKm) formData.append('distanceFromAiimsKm', distanceFromAiimsKm);
-    formData.append('pricePerNight', pricePerNight);
-    formData.append('ownerContactNumber', ownerContactNumber);
+    formData.append("propertyType", propertyType);
+    formData.append("description", description);
+    formData.append("location", location);
+    formData.append("address", address);
+    if (distanceFromAiimsKm)
+      formData.append("distanceFromAiimsKm", distanceFromAiimsKm);
+    formData.append("pricePerNight", pricePerNight);
+    formData.append("ownerContactNumber", ownerContactNumber);
 
     // each selected amenity appended under the same key - builds an array on the backend
-    amenities.forEach((amenity) => formData.append('amenities', amenity));
+    amenities.forEach((amenity) => formData.append("amenities", amenity));
 
     // each selected file appended under 'images' - matches upload.array('images', 6) on the backend
-    images.forEach((file) => formData.append('images', file));
+    images.forEach((file) => formData.append("images", file));
 
     setSubmitting(true);
     try {
-      const response = await api.post('/api/properties', formData);
+      const response = await api.post("/api/properties", formData);
       navigate(`/properties/${response.data._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create listing. Please try again.');
+      setError(
+        err.response?.data?.message ||
+          "Failed to create listing. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -69,8 +73,10 @@ function AddProperty() {
     <div className="max-w-xl mx-auto px-6 py-10">
       <h1 className="text-2xl font-semibold text-ink">List a property</h1>
 
-      <form onSubmit={handleSubmit} className="mt-6 border border-line rounded-lg p-6 flex flex-col gap-4">
-
+      <form
+        onSubmit={handleSubmit}
+        className="mt-6 border border-line rounded-lg p-6 flex flex-col gap-4"
+      >
         <label className="block">
           <span className="text-sm text-muted">Property type</span>
           <select
@@ -123,7 +129,9 @@ function AddProperty() {
         </label>
 
         <label className="block">
-          <span className="text-sm text-muted">Distance from AIIMS (km) — optional</span>
+          <span className="text-sm text-muted">
+            Distance from AIIMS (km) — optional
+          </span>
           <input
             type="number"
             value={distanceFromAiimsKm}
@@ -150,7 +158,10 @@ function AddProperty() {
           <span className="text-sm text-muted">Amenities</span>
           <div className="flex flex-wrap gap-4 mt-2">
             {AMENITIES.map((amenity) => (
-              <label key={amenity} className="flex items-center gap-2 text-sm text-ink">
+              <label
+                key={amenity}
+                className="flex items-center gap-2 text-sm text-ink"
+              >
                 <input
                   type="checkbox"
                   checked={amenities.includes(amenity)}
@@ -191,9 +202,8 @@ function AddProperty() {
           disabled={submitting}
           className="w-full px-5 py-2 rounded-md bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-50"
         >
-          {submitting ? 'Creating listing...' : 'Create listing'}
+          {submitting ? "Creating listing..." : "Create listing"}
         </button>
-
       </form>
     </div>
   );
