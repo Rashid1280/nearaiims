@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
-// An append-only log of payment events. Booking holds the CURRENT state;
-// Transaction keeps the history of what happened and when.
+// An append-only log of payment events. Booking holds only the CURRENT state while
+// Transaction keeps the history of what happened and when (All events).
 const transactionSchema = new mongoose.Schema(
   {
     bookingId: {
@@ -12,9 +12,7 @@ const transactionSchema = new mongoose.Schema(
     },
     razorpayOrderId: { type: String },
     razorpayPaymentId: { type: String },
-    // Razorpay's id for this webhook delivery (from the X-Razorpay-Event-Id header)
     razorpayEventId: { type: String },
-    // in rupees, same as Booking.amount
     amount: { type: Number, required: true, min: 0 },
     currency: { type: String, default: "INR" },
     eventType: {
@@ -28,13 +26,13 @@ const transactionSchema = new mongoose.Schema(
         "refund_processed",
       ],
     },
-    // the webhook body as received, kept for debugging
+    // the webhook body as received, kept for debugging(As the name suggests raw payload)
     rawPayload: { type: mongoose.Schema.Types.Mixed },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
 
-// no two rows may share an event id, so a webhook Razorpay re-sends can't be recorded twice
+// no two documents may share an event id, so a webhook Razorpay re-sends can't be recorded twice
 transactionSchema.index(
   { razorpayEventId: 1 },
   {
