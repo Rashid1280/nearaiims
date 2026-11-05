@@ -1,30 +1,30 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import api from '../api/axios';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext.jsx";
 
-const AMENITIES = ['furnished', 'ac', 'kitchenAccess', 'parking'];
+const AMENITIES = ["furnished", "ac", "kitchenAccess", "parking"];
 
 function EditProperty() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [propertyType, setPropertyType] = useState('');
-  const [description, setDescription] = useState('');
-  const [location, setLocation] = useState('');
-  const [address, setAddress] = useState('');
-  const [distanceFromAiimsKm, setDistanceFromAiimsKm] = useState('');
-  const [pricePerNight, setPricePerNight] = useState('');
+  const [propertyType, setPropertyType] = useState("");
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [address, setAddress] = useState("");
+  const [distanceFromAiimsKm, setDistanceFromAiimsKm] = useState("");
+  const [pricePerNight, setPricePerNight] = useState("");
   const [amenities, setAmenities] = useState([]);
-  const [ownerContactNumber, setOwnerContactNumber] = useState('');
+  const [ownerContactNumber, setOwnerContactNumber] = useState("");
   const [images, setImages] = useState([]); // newly selected replacement files, if any
   const [existingImages, setExistingImages] = useState([]); // paths already on the server
   const [ownerId, setOwnerId] = useState(null);
 
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
-  const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState("");
+  const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   // loads the existing listing once, and fills every field with its current values
@@ -38,14 +38,14 @@ function EditProperty() {
         setDescription(property.description);
         setLocation(property.location);
         setAddress(property.address);
-        setDistanceFromAiimsKm(property.distanceFromAiimsKm ?? '');
+        setDistanceFromAiimsKm(property.distanceFromAiimsKm ?? "");
         setPricePerNight(property.pricePerNight);
         setAmenities(property.amenities || []);
-        setOwnerContactNumber(property.ownerContactNumber || '');
+        setOwnerContactNumber(property.ownerContactNumber || "");
         setExistingImages(property.images || []);
         setOwnerId(property.owner?._id || property.owner);
       } catch {
-        setLoadError('Could not load this listing.');
+        setLoadError("Could not load this listing.");
       } finally {
         setLoading(false);
       }
@@ -58,35 +58,39 @@ function EditProperty() {
     setAmenities((prev) =>
       prev.includes(amenity)
         ? prev.filter((a) => a !== amenity)
-        : [...prev, amenity]
+        : [...prev, amenity],
     );
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
+    setError("");
 
     const formData = new FormData();
-    formData.append('propertyType', propertyType);
-    formData.append('description', description);
-    formData.append('location', location);
-    formData.append('address', address);
-    if (distanceFromAiimsKm) formData.append('distanceFromAiimsKm', distanceFromAiimsKm);
-    formData.append('pricePerNight', pricePerNight);
-    formData.append('ownerContactNumber', ownerContactNumber);
+    formData.append("propertyType", propertyType);
+    formData.append("description", description);
+    formData.append("location", location);
+    formData.append("address", address);
+    if (distanceFromAiimsKm)
+      formData.append("distanceFromAiimsKm", distanceFromAiimsKm);
+    formData.append("pricePerNight", pricePerNight);
+    formData.append("ownerContactNumber", ownerContactNumber);
 
-    amenities.forEach((amenity) => formData.append('amenities', amenity));
+    amenities.forEach((amenity) => formData.append("amenities", amenity));
 
     // only attach new photos if the owner actually picked replacements -
     // the backend leaves the existing images untouched when none are sent
-    images.forEach((file) => formData.append('images', file));
+    images.forEach((file) => formData.append("images", file));
 
     setSubmitting(true);
     try {
       await api.put(`/api/properties/${id}`, formData);
       navigate(`/properties/${id}`);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update listing. Please try again.');
+      setError(
+        err.response?.data?.message ||
+          "Failed to update listing. Please try again.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -101,15 +105,21 @@ function EditProperty() {
   }
 
   if (user && ownerId && user.id !== ownerId) {
-    return <p className="text-center text-danger mt-12">You don't have permission to edit this listing.</p>;
+    return (
+      <p className="text-center text-danger mt-12">
+        You don't have permission to edit this listing.
+      </p>
+    );
   }
 
   return (
     <div className="max-w-xl mx-auto px-6 py-10">
       <h1 className="text-2xl font-semibold text-ink">Edit property</h1>
 
-      <form onSubmit={handleSubmit} className="mt-6 border border-line rounded-lg p-6 flex flex-col gap-4">
-
+      <form
+        onSubmit={handleSubmit}
+        className="mt-6 border border-line rounded-lg p-6 flex flex-col gap-4"
+      >
         <label className="block">
           <span className="text-sm text-muted">Property type</span>
           <select
@@ -162,7 +172,9 @@ function EditProperty() {
         </label>
 
         <label className="block">
-          <span className="text-sm text-muted">Distance from AIIMS (km) — optional</span>
+          <span className="text-sm text-muted">
+            Distance from AIIMS (km) — optional
+          </span>
           <input
             type="number"
             value={distanceFromAiimsKm}
@@ -189,7 +201,10 @@ function EditProperty() {
           <span className="text-sm text-muted">Amenities</span>
           <div className="flex flex-wrap gap-4 mt-2">
             {AMENITIES.map((amenity) => (
-              <label key={amenity} className="flex items-center gap-2 text-sm text-ink">
+              <label
+                key={amenity}
+                className="flex items-center gap-2 text-sm text-ink"
+              >
                 <input
                   type="checkbox"
                   checked={amenities.includes(amenity)}
@@ -228,7 +243,9 @@ function EditProperty() {
         )}
 
         <label className="block">
-          <span className="text-sm text-muted">Replace photos — optional, leave blank to keep the current ones</span>
+          <span className="text-sm text-muted">
+            Replace photos — optional, leave blank to keep the current ones
+          </span>
           <input
             type="file"
             accept="image/*"
@@ -245,9 +262,8 @@ function EditProperty() {
           disabled={submitting}
           className="w-full px-5 py-2 rounded-md bg-brand text-white text-sm font-medium hover:bg-brand-dark disabled:opacity-50"
         >
-          {submitting ? 'Saving changes...' : 'Save changes'}
+          {submitting ? "Saving changes..." : "Save changes"}
         </button>
-
       </form>
     </div>
   );

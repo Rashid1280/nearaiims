@@ -1,25 +1,25 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const { setUser } = useAuth();
   const navigate = useNavigate();
 
   async function handleSubmit(e) {
-    e.preventDefault(); 
+    e.preventDefault();
 
     try {
-      const response = await api.post('/api/auth/login', { email, password });
-      setUser(response.data.user); 
-      navigate('/'); 
+      const response = await api.post("/api/auth/login", { email, password });
+      setUser(response.data.user);
+      navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || "Login failed");
     }
   }
 
@@ -27,7 +27,10 @@ function Login() {
     <div className="max-w-sm mx-auto px-6 py-16">
       <h1 className="text-2xl font-semibold text-ink text-center">Login</h1>
 
-      <form onSubmit={handleSubmit} className="mt-8 border border-line rounded-lg p-6">
+      <form
+        onSubmit={handleSubmit}
+        className="mt-8 border border-line rounded-lg p-6"
+      >
         <input
           type="email"
           value={email}
