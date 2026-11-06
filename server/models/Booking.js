@@ -71,8 +71,7 @@ const bookingSchema = new mongoose.Schema(
 // speeds up search for "confirmed bookings for this property that overlap these dates" (as multiple indexes , not just id index),
 // Also the write call becomes a little slower as the index will update with every call and will also take storage.
 bookingSchema.index({ property: 1, status: 1, startDate: 1, endDate: 1 });
-bookingSchema.index({ razorpayOrderId: 1 }, { sparse: true });
-
+bookingSchema.index({ razorpayOrderId: 1 });
 const Booking = mongoose.model("Booking", bookingSchema);
 
 module.exports = Booking;
