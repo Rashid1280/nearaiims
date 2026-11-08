@@ -30,4 +30,18 @@ function parseDate(value) {
   return date;
 }
 
-module.exports = { countNights, calculateAmounts, toPaise, parseDate };
+const IST_OFFSET_MS = 5.5 * 60 * 60 * 1000; // India is UTC+5:30
+
+// Today's date in India, as a UTC-midnight Date (same format parseDate returns)
+function todayInIndia(now = Date.now()) {
+  const istNow = new Date(now + IST_OFFSET_MS);
+  return new Date(istNow.toISOString().slice(0, 10) + "T00:00:00.000Z");
+}
+
+module.exports = {
+  countNights,
+  calculateAmounts,
+  toPaise,
+  parseDate,
+  todayInIndia,
+};
