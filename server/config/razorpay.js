@@ -13,18 +13,22 @@ function getKeyId() {
   return keyId;
 }
 
+function getKeySecret() {
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keySecret) {
+    throw new Error("RAZORPAY_KEY_SECRET is not set");
+  }
+  return keySecret;
+}
+
 let razorpayInstance = null;
 
 // Builds the Razorpay client on first use, then reuses it.
 function getRazorpay() {
   if (!razorpayInstance) {
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-    if (!keySecret) {
-      throw new Error("RAZORPAY_KEY_SECRET is not set");
-    }
     razorpayInstance = new Razorpay({
       key_id: getKeyId(),
-      key_secret: keySecret,
+      key_secret: getKeySecret(),
     });
   }
   return razorpayInstance;
@@ -38,4 +42,4 @@ function getWebhookSecret() {
   return webhookSecret;
 }
 
-module.exports = { getKeyId, getRazorpay, getWebhookSecret };
+module.exports = { getKeyId, getKeySecret, getRazorpay, getWebhookSecret };
