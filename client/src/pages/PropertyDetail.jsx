@@ -9,6 +9,7 @@ import {
   ParkingCircle,
   CheckCircle2,
 } from "lucide-react";
+import { loadRazorpay } from "../utils/loadRazorpay";
 
 const AMENITY_DISPLAY = {
   furnished: { label: "Furnished", Icon: Sofa },
@@ -23,7 +24,6 @@ function PropertyDetail() {
 
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [message, setMessage] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingError, setBookingError] = useState("");
@@ -64,20 +64,68 @@ function PropertyDetail() {
     setSubmitting(true);
 
     try {
-      await api.post("/api/bookings", {
+      const { data } = await api.post("/api/bookings/reserve", {
         propertyId: id,
         startDate,
         endDate,
-        message,
       });
-      setBookingStatus("success");
-      setStartDate("");
-      setEndDate("");
-      setMessage("");
+
+      let paid = false;
+      let failureReason = "";
+
+      const Razorpay = await loadRazorpay();
+      const popup = new Razorpay({
+        key: data.keyId,
+        order_id: data.orderId,
+        amount: data.amountInPaise,
+        currency: "INR",
+        name: "NearAIIMS",
+        description: `${propertyType} in ${location}`,
+        prefill: { name: user.name, email: user.email },
+        handler: (response) => {
+          paid = true;
+          handlePaymentSuccess(response);
+        },
+        modal: {
+          ondismiss: () => {
+            if (paid) return;
+            setBookingError(
+              failureReason ||
+                "Payment was not completed. Your dates are not booked yet.",
+            );
+            setBookingStatus("error");
+          },
+        },
+      });
+      popup.on("payment.failed", (response) => {
+        failureReason = response.error.description;
+      });
+      popup.open();
     } catch (error) {
       setBookingError(
         error.response?.data?.message ||
           "Something went wrong. Please try again.",
+      );
+      setBookingStatus("error");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handlePaymentSuccess(response) {
+    setSubmitting(true);
+    try {
+      await api.post("/api/payments/verify", {
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_signature: response.razorpay_signature,
+      });
+      setBookingStatus("success");
+      setStartDate("");
+      setEndDate("");
+    } catch {
+      setBookingError(
+        "Your payment went through, but we could not confirm the booking yet. Please check My Bookings in a minute.",
       );
       setBookingStatus("error");
     } finally {
@@ -147,11 +195,11 @@ function PropertyDetail() {
               <div className="text-center py-4">
                 <CheckCircle2 size={40} className="text-accent mx-auto" />
                 <h2 className="font-semibold text-ink text-lg mt-3">
-                  Request sent!
+                  Booking confirmed!
                 </h2>
                 <p className="text-sm text-muted mt-2">
-                  The owner has been notified. You'll see the status of this
-                  request under My Bookings.
+                  Your payment was received. You can see this booking under My
+                  Bookings.
                 </p>
                 <button
                   onClick={handleRequestAnother}
@@ -162,7 +210,7 @@ function PropertyDetail() {
               </div>
             ) : (
               <form onSubmit={handleBookingSubmit}>
-                <h2 className="font-semibold text-ink mb-4">Request to book</h2>
+                <h2 className="font-semibold text-ink mb-4">Book this stay</h2>
 
                 <label className="block mb-4">
                   <span className="text-sm text-muted">Check-in</span>
@@ -186,25 +234,12 @@ function PropertyDetail() {
                   />
                 </label>
 
-                <label className="block mb-4">
-                  <span className="text-sm text-muted">
-                    Message to owner (optional)
-                  </span>
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Any details the owner should know..."
-                    className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
-                    rows="3"
-                  />
-                </label>
-
                 <button
                   type="submit"
                   disabled={submitting}
                   className="w-full px-5 py-2 rounded-md bg-accent text-white text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
-                  {submitting ? "Sending request..." : "Request to Book"}
+                  {submitting ? "Reserving..." : "Reserve & Pay"}
                 </button>
 
                 {bookingStatus === "error" && (
