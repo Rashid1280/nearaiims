@@ -156,6 +156,7 @@ router.post("/reserve", requireAuth, async (req, res, next) => {
       orderId: order.id,
       keyId: getKeyId(),
       amount: booking.amount,
+      amountInPaise: order.amount,
     });
   } catch (error) {
     next(error);
