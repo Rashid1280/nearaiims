@@ -6,10 +6,16 @@ const cookieParser = require("cookie-parser");
 const propertyRoutes = require("./routes/propertyRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const webhookRoutes = require("./routes/webhookRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const cors = require("cors");
 
 const app = express();
+app.use(
+  "/api/webhooks",
+  express.raw({ type: "application/json" }),
+  webhookRoutes,
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(
