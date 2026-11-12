@@ -28,23 +28,16 @@ const bookingSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    // renter's optional note to the owner
-    message: {
-      type: String,
-    },
     status: {
       type: String,
       enum: [
-        "pending",
-        "accepted",
-        "declined",
         "payment_pending",
         "payment_failed",
         "confirmed",
         "cancelled",
         "refunded",
       ],
-      default: "pending",
+      default: "payment_pending",
     },
     pricePerNight: { type: Number, min: 0 },
     nights: { type: Number, min: 1 },
