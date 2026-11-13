@@ -70,15 +70,16 @@ Near-AIIMS-Fresh/
 ├── client/ # React frontend (Vite)
 │ └── src/
 │ ├── context/ # AuthContext — global auth state
-│ ├── pages/ # Login, Register, Dashboard, and other route-level pages
+│ ├── pages/ # Login, Register, Dashboard, PropertyDetail, and other route-level pages
+│ ├── utils/ # loadRazorpay — loads Razorpay Checkout script on demand
 │ └── components/ # Reusable components (e.g. ProtectedRoute)
 └── server/ # Express backend
-├── config/ # Database connection, Cloudinary configuration
+├── config/ # Database connection, Cloudinary config, Razorpay config (lazy, test-key-only)
 ├── middleware/ # requireAuth, upload (multer + Cloudinary storage), errorHandler
-├── models/ # User, Property, Booking (Mongoose schemas)
-├── routes/ # authRoutes, propertyRoutes, bookingRoutes
-├── utils/ # AppError class
-└── seed.js # Populates the database with test users, properties, and bookings
+├── models/ # User, Property, Booking, Transaction (Mongoose schemas)
+├── routes/ # authRoutes, propertyRoutes, bookingRoutes, paymentRoutes, webhookRoutes
+├── utils/ # AppError, pricing (amounts/date helpers), signature (HMAC verification)
+└── seed.js # Populates the database with test users, properties, and bookings (dev database only)
 
 ## Setup
 
@@ -87,6 +88,7 @@ Near-AIIMS-Fresh/
 - Node.js installed
 - A MongoDB Atlas connection string (or local MongoDB instance)
 - A Cloudinary account (free tier is sufficient) — needed for image uploads
+- A Razorpay account with **test mode** API keys (free, no business verification needed) — needed for payments
 
 ### Backend
 
@@ -104,6 +106,11 @@ NODE_ENV=development
 CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
 CLOUDINARY_API_KEY=your_cloudinary_api_key
 CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+RAZORPAY_KEY_ID=rzp_test_your_key_id
+RAZORPAY_KEY_SECRET=your_key_secret
+RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
+
+`RAZORPAY_KEY_ID` must start with `rzp_test_` — the app refuses any other prefix, so a live key can never be used by accident.
 
 Run the server:
 
@@ -111,11 +118,15 @@ Run the server:
 npm run dev
 ```
 
-Optionally, populate the database with test data (creates sample users, properties with real Cloudinary-hosted images, and bookings across every status):
+Optionally, populate the database with test data (creates sample users, properties with real photos, and bookings across every payment status):
 
 ```bash
 npm run seed
 ```
+
+The seed script refuses to run against any database except `stayfinder_dev`, as a safeguard against accidentally wiping production data.
+
+For local webhook testing, Razorpay needs a public HTTPS URL. Use a tunnel such as [ngrok](https://ngrok.com) (`ngrok http 5000`) and register the forwarded URL plus `/api/webhooks/razorpay` as a webhook in the Razorpay dashboard (test mode).
 
 ### Frontend
 
@@ -129,27 +140,37 @@ The frontend runs on Vite's default port (typically `5173`) and talks to the bac
 
 ## API Overview
 
-| Method | Route                      | Description                                                                                       | Auth required |
-| ------ | -------------------------- | ------------------------------------------------------------------------------------------------- | ------------- |
-| POST   | `/api/auth/register`       | Create a new user                                                                                 | No            |
-| POST   | `/api/auth/login`          | Log in, sets auth cookie                                                                          | No            |
-| POST   | `/api/auth/logout`         | Log out, clears auth cookie                                                                       | No            |
-| GET    | `/api/auth/me`             | Get current logged-in user                                                                        | Yes           |
-| GET    | `/api/properties`          | List properties, supports filters                                                                 | No            |
-| GET    | `/api/properties/mine`     | List the logged-in user's own listings                                                            | Yes           |
-| GET    | `/api/properties/:id`      | Get one property (owner's contact number included only if the requester is that property's owner) | No            |
-| POST   | `/api/properties`          | Create a property listing                                                                         | Yes           |
-| PUT    | `/api/properties/:id`      | Update a listing (owner only)                                                                     | Yes           |
-| DELETE | `/api/properties/:id`      | Delete a listing (owner only)                                                                     | Yes           |
-| POST   | `/api/bookings`            | Request a booking                                                                                 | Yes           |
-| GET    | `/api/bookings/mine`       | Bookings made as a renter (owner's contact number included only for accepted bookings)            | Yes           |
-| GET    | `/api/bookings/received`   | Booking requests received as an owner                                                             | Yes           |
-| PUT    | `/api/bookings/:id/status` | Accept/decline a booking (owner only)                                                             | Yes           |
+| Method | Route                    | Description                                                                  | Auth required |
+| ------ | ------------------------ | ---------------------------------------------------------------------------- | ------------- |
+| POST   | `/api/auth/register`     | Create a new user                                                            | No            |
+| POST   | `/api/auth/login`        | Log in, sets auth cookie                                                     | No            |
+| POST   | `/api/auth/logout`       | Log out, clears auth cookie                                                  | No            |
+| GET    | `/api/auth/me`           | Get current logged-in user                                                   | Yes           |
+| GET    | `/api/properties`        | List properties, supports filters                                            | No            |
+| GET    | `/api/properties/mine`   | List the logged-in user's own listings                                       | Yes           |
+| GET    | `/api/properties/:id`    | Get one property (owner's contact number included only if requester owns it) | No            |
+| POST   | `/api/properties`        | Create a property listing                                                    | Yes           |
+| PUT    | `/api/properties/:id`    | Update a listing (owner only)                                                | Yes           |
+| DELETE | `/api/properties/:id`    | Delete a listing (owner only)                                                | Yes           |
+| POST   | `/api/bookings/reserve`  | Reserve dates and create a Razorpay order (recomputes price server-side)     | Yes           |
+| GET    | `/api/bookings/mine`     | Bookings made as a renter (owner's contact number included once confirmed)   | Yes           |
+| GET    | `/api/bookings/received` | Paid bookings (confirmed/cancelled/refunded) on properties owned             | Yes           |
+| POST   | `/api/payments/verify`   | Verify a Razorpay payment signature and confirm the booking                  | Yes           |
+| POST   | `/api/webhooks/razorpay` | Razorpay webhook — confirms/fails bookings; signature-checked, idempotent    | No (signed)   |
 
 ## Status
 
-Currently implementing payment integration with razorpay webhooks. Backend (auth, properties, bookings, Cloudinary image storage) and frontend (auth flow, protected routes, browse/filter, property detail with booking form, full owner dashboard) are complete.
+Payment integration with Razorpay (test mode) is complete: reserve → pay → verify/webhook → confirmed, with idempotent webhook handling and a full Transaction audit trail. Backend (auth, properties, bookings, payments, Cloudinary image storage) and frontend (auth flow, protected routes, browse/filter, property detail with Razorpay Checkout, full owner dashboard) are complete.
+
+<table>
+<tr>
+<td><img src="docs/screenshots/owner-bookings-received.png" width="300"><br/><sub>Owner dashboard — bookings received</sub></td>
+<td><img src="docs/screenshots/owner-listings.png" width="300"><br/><sub>Owner dashboard — my listings</sub></td>
+</tr>
+</table>
 
 ## Known Limitations
 
-- Booking creation checks for date overlaps only against the same renter's own existing requests on a property, not against other renters' pending requests for the same dates. Multiple renters can submit overlapping pending requests for the same listing; only one will actually be accepted, since the accept route enforces the real conflict check at that point.
+- Two renters can both start a (separate) payment for the same dates before either pays; only confirmed bookings block dates, so whichever payment is captured first wins. A soft hold on reserved-but-unpaid dates is planned but not yet built.
+- A renter who closes the Razorpay popup without paying, or whose payment fails, is left with a `payment_pending` / `payment_failed` booking with no way to retry from the UI yet — a "Pay now" retry route is planned.
+- No cancellation or refund flow yet; owners see "Amount earned" for a confirmed booking, but payouts are recorded only, never actually transferred (by design — this project stays entirely in Razorpay test mode).
