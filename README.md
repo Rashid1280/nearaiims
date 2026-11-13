@@ -66,20 +66,22 @@ Payments run entirely in Razorpay **test mode** — no real money moves at any p
 
 ## Project Structure
 
+```
 Near-AIIMS-Fresh/
-├── client/ # React frontend (Vite)
-│ └── src/
-│ ├── context/ # AuthContext — global auth state
-│ ├── pages/ # Login, Register, Dashboard, PropertyDetail, and other route-level pages
-│ ├── utils/ # loadRazorpay — loads Razorpay Checkout script on demand
-│ └── components/ # Reusable components (e.g. ProtectedRoute)
-└── server/ # Express backend
-├── config/ # Database connection, Cloudinary config, Razorpay config (lazy, test-key-only)
-├── middleware/ # requireAuth, upload (multer + Cloudinary storage), errorHandler
-├── models/ # User, Property, Booking, Transaction (Mongoose schemas)
-├── routes/ # authRoutes, propertyRoutes, bookingRoutes, paymentRoutes, webhookRoutes
-├── utils/ # AppError, pricing (amounts/date helpers), signature (HMAC verification)
-└── seed.js # Populates the database with test users, properties, and bookings (dev database only)
+├── client/              # React frontend (Vite)
+│   └── src/
+│       ├── context/      # AuthContext — global auth state
+│       ├── pages/        # Login, Register, Dashboard, PropertyDetail, and other route-level pages
+│       ├── utils/        # loadRazorpay — loads Razorpay Checkout script on demand
+│       └── components/   # Reusable components (e.g. ProtectedRoute)
+└── server/               # Express backend
+    ├── config/           # Database connection, Cloudinary config, Razorpay config (lazy, test-key-only)
+    ├── middleware/       # requireAuth, upload (multer + Cloudinary storage), errorHandler
+    ├── models/           # User, Property, Booking, Transaction (Mongoose schemas)
+    ├── routes/           # authRoutes, propertyRoutes, bookingRoutes, paymentRoutes, webhookRoutes
+    ├── utils/            # AppError, pricing (amounts/date helpers), signature (HMAC verification)
+    └── seed.js           # Populates the database with test users, properties, and bookings (dev database only)
+```
 
 ## Setup
 
@@ -99,6 +101,7 @@ npm install
 
 Create a `.env` file in `server/` with:
 
+```
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 PORT=5000
@@ -109,6 +112,7 @@ CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 RAZORPAY_KEY_ID=rzp_test_your_key_id
 RAZORPAY_KEY_SECRET=your_key_secret
 RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
+```
 
 `RAZORPAY_KEY_ID` must start with `rzp_test_` — the app refuses any other prefix, so a live key can never be used by accident.
 
