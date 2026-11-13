@@ -3,6 +3,13 @@ import api from "../api/axios";
 import { Link } from "react-router-dom";
 import { ImageOff } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+const STATUS_LABELS = {
+  payment_pending: "Payment pending",
+  payment_failed: "Payment failed",
+  confirmed: "Confirmed",
+  cancelled: "Cancelled",
+  refunded: "Refunded",
+};
 
 function BookingThumbnail({ property }) {
   if (property?.images?.length > 0) {
@@ -93,21 +100,6 @@ function OwnerDashboard() {
     fetchMyBookings();
   }, []);
 
-  async function handleStatusUpdate(bookingId, newStatus) {
-    try {
-      await api.put(`/api/bookings/${bookingId}/status`, { status: newStatus });
-      setBookings((prevBookings) =>
-        prevBookings.map((booking) =>
-          booking._id === bookingId
-            ? { ...booking, status: newStatus }
-            : booking,
-        ),
-      );
-    } catch (error) {
-      console.error("Failed to update booking status:", error);
-    }
-  }
-
   // ---- Listing management actions ----
 
   async function toggleAvailability(propertyId, currentValue) {
@@ -148,8 +140,10 @@ function OwnerDashboard() {
   }
 
   function statusBadgeStyle(status) {
-    if (status === "accepted") return "bg-accent/10 text-accent";
-    if (status === "declined") return "bg-danger/10 text-danger";
+    if (status === "confirmed") return "bg-accent/10 text-accent";
+    if (["payment_failed", "cancelled"].includes(status)) {
+      return "bg-danger/10 text-danger";
+    }
     return "bg-line text-muted";
   }
 
@@ -157,15 +151,6 @@ function OwnerDashboard() {
   function formatDate(dateString) {
     if (!dateString) return "N/A";
     return dateString.slice(0, 10);
-  }
-
-  function pendingCountFor(propertyId) {
-    return bookings.filter(
-      (booking) =>
-        booking.property &&
-        booking.property._id === propertyId &&
-        booking.status === "pending",
-    ).length;
   }
 
   //isActive compares the passed-in tab argument against the component's activeTab state — if they match, it gets underline and colored text, signaling "you're here"
@@ -178,10 +163,9 @@ function OwnerDashboard() {
     }`;
   }
 
-  // derived, not stored in state - recalculates automatically whenever
-  // `bookings` changes, so it can never drift out of sync with the real data
-  const totalPending = bookings.filter(
-    (booking) => booking.status === "pending",
+  // derived, not stored in state - recalculates whenever `bookings` changes
+  const confirmedCount = bookings.filter(
+    (booking) => booking.status === "confirmed",
   ).length;
 
   return (
@@ -201,8 +185,8 @@ function OwnerDashboard() {
             <p className="text-xs text-muted">Listings</p>
           </div>
           <div className="text-center">
-            <p className="text-xl font-semibold text-ink">{totalPending}</p>
-            <p className="text-xs text-muted">Pending requests</p>
+            <p className="text-xl font-semibold text-ink">{confirmedCount}</p>
+            <p className="text-xs text-muted">Confirmed bookings</p>
           </div>
           <div className="text-center">
             <p className="text-xl font-semibold text-ink">
@@ -224,12 +208,7 @@ function OwnerDashboard() {
           onClick={() => setActiveTab("received")}
           className={tabClassName("received")}
         >
-          Requests Received
-          {totalPending > 0 && (
-            <span className="bg-danger text-white text-xs rounded-full px-1.5 py-0.5 leading-none">
-              {totalPending}
-            </span>
-          )}
+          Bookings Received
         </button>
         <button
           onClick={() => setActiveTab("bookings")}
@@ -267,7 +246,6 @@ function OwnerDashboard() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
               {listings.map((property) => {
-                const pending = pendingCountFor(property._id);
                 return (
                   <div
                     key={property._id}
@@ -284,12 +262,6 @@ function OwnerDashboard() {
                         <div className="w-full h-40 flex items-center justify-center bg-surface text-muted">
                           <ImageOff size={28} />
                         </div>
-                      )}
-
-                      {pending > 0 && (
-                        <span className="absolute top-2 right-2 bg-danger text-white text-xs font-medium px-2 py-1 rounded-full">
-                          {pending} pending
-                        </span>
                       )}
                     </div>
 
@@ -355,9 +327,9 @@ function OwnerDashboard() {
       {activeTab === "received" && (
         <section className="mt-6">
           {loading ? (
-            <p className="text-muted mt-4">Loading requests...</p>
+            <p className="text-muted mt-4">Loading bookings...</p>
           ) : bookings.length === 0 ? (
-            <p className="text-muted mt-4">No booking requests yet.</p>
+            <p className="text-muted mt-4">No paid bookings yet.</p>
           ) : (
             <div className="flex flex-col gap-4 mt-4">
               {bookings.map((booking) => (
@@ -377,45 +349,20 @@ function OwnerDashboard() {
                               {booking.property.location}
                             </h3>
                             <p className="text-sm text-muted mt-1">
-                              Requested by: {booking.renter.name} (
+                              Booked by: {booking.renter.name} (
                               {booking.renter.phone})
                             </p>
                             <p className="text-sm text-ink mt-1">
                               {formatDate(booking.startDate)} to{" "}
                               {formatDate(booking.endDate)}
                             </p>
-                            {booking.message && (
-                              <p className="text-sm text-muted mt-1">
-                                Message: {booking.message}
-                              </p>
-                            )}
                           </div>
                           <span
                             className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}
                           >
-                            {booking.status}
+                            {STATUS_LABELS[booking.status] || booking.status}
                           </span>
                         </div>
-                        {booking.status === "pending" && (
-                          <div className="flex gap-3 mt-4">
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(booking._id, "accepted")
-                              }
-                              className="px-4 py-1.5 rounded-md bg-accent text-white text-sm font-medium hover:opacity-90"
-                            >
-                              Accept
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleStatusUpdate(booking._id, "declined")
-                              }
-                              className="px-4 py-1.5 rounded-md border border-danger text-danger text-sm font-medium hover:bg-danger/10"
-                            >
-                              Decline
-                            </button>
-                          </div>
-                        )}
                       </>
                     ) : (
                       <p className="text-sm text-muted">
@@ -470,26 +417,38 @@ function OwnerDashboard() {
                               {formatDate(booking.startDate)} to{" "}
                               {formatDate(booking.endDate)}
                             </p>
-                            <p className="text-sm text-muted mt-1">
-                              ₹{booking.property.pricePerNight} / night
-                            </p>
+                            {booking.amount && (
+                              <p className="text-sm text-muted mt-1">
+                                ₹{booking.amount} total ({booking.nights}{" "}
+                                nights)
+                              </p>
+                            )}
                           </div>
                           <span
                             className={`text-xs font-medium px-2.5 py-1 rounded-full whitespace-nowrap ${statusBadgeStyle(booking.status)}`}
                           >
-                            {booking.status}
+                            {STATUS_LABELS[booking.status] || booking.status}
                           </span>
                         </div>
 
-                        {booking.status === "accepted" && (
+                        {booking.status === "confirmed" && (
                           <p className="text-sm text-accent mt-3">
-                            Accepted! Contact the owner at{" "}
+                            Booking confirmed! Contact the owner at{" "}
                             <a
                               href={`tel:${booking.property.ownerContactNumber}`}
                               className="font-medium underline"
                             >
                               {booking.property.ownerContactNumber}
                             </a>
+                          </p>
+                        )}
+
+                        {["payment_pending", "payment_failed"].includes(
+                          booking.status,
+                        ) && (
+                          <p className="text-sm text-muted mt-3">
+                            Payment not completed. These dates are not booked
+                            yet.
                           </p>
                         )}
                       </>
