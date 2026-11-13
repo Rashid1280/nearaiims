@@ -1,6 +1,14 @@
 # NearAIIMS
 
-A MERN-stack platform connecting patients and families visiting AIIMS Raipur for treatment with owners renting short-term homes nearby.
+A MERN-stack platform connecting patients and families visiting AIIMS Raipur for treatment with owners renting short-term homes nearby — with Razorpay payments in test mode.
+
+<table>
+<tr>
+<td><img src="docs/screenshots/homepage.png" width="280"><br/><sub>Home page</sub></td>
+<td><img src="docs/screenshots/properties-page.png" width="280"><br/><sub>Browse properties</sub></td>
+<td><img src="docs/screenshots/property-detail.png" width="280"><br/><sub>Property detail &amp; booking</sub></td>
+</tr>
+</table>
 
 ## Problem
 
@@ -12,24 +20,45 @@ Many patients traveling to AIIMS Raipur for treatment (often for weeks or months
 - Password hashing with bcrypt
 - Property listings with image uploads, stored on Cloudinary
 - Search and filter properties by location, property type, and price range
-- Owner dashboard with three views: My Listings, Requests Received, and My Bookings — since any user can act as both an owner and a renter
+- Instant reservation flow: a renter reserves dates and pays immediately, no owner approval step — the server recomputes the price, checks for date conflicts against confirmed bookings, and creates a Razorpay order before saving the booking
+- Razorpay Checkout integration (test mode), with server-side signature verification before any booking is confirmed
+- Idempotent webhook handler for `payment.captured` and `payment.failed` — a closed browser tab, a duplicate delivery, or an out-of-order event can never leave a paid booking unconfirmed or corrupt its state
+- A separate `Transaction` collection keeps a full payment history (order created, captured, failed) distinct from each booking's current state
+- Owner dashboard with three views: My Listings, Bookings Received (confirmed/paid bookings only), and My Bookings
 - Listing management: edit, toggle availability, and delete, each with appropriate confirmation/feedback
-- Booking request system connecting renters and property owners
-- Owner-only accept/decline flow, with date-overlap conflict detection to prevent double-booking
-- Duplicate-booking guard preventing the same renter from submitting overlapping requests on the same property, while still allowing non-overlapping repeat bookings
-- Owner contact number is hidden from public listing views and only revealed to a renter once their specific booking is accepted
+- Owner contact number is hidden from public listing views and only revealed to a renter once their booking is confirmed (paid)
 - Ownership-based authorization on every protected route (users can only modify their own listings/bookings)
 - Centralized error handling via a custom `AppError` class and a single error-handling middleware
 - React frontend with client-side routing (React Router)
 - Global authentication state via React Context, persisted across page refreshes
 - Protected frontend routes that redirect unauthenticated users to login
-- Seed script for generating realistic test data (users, properties with real Cloudinary-hosted images, and bookings in every status)
+- Seed script for generating realistic test data, guarded to only ever run against the local development database
+
+## Payments
+
+Payments run entirely in Razorpay **test mode** — no real money moves at any point.
+
+1. A renter picks dates and clicks **Reserve & Pay**. The server recomputes the price from the listing itself (a client-sent amount is never trusted), checks for a date conflict against any _confirmed_ booking, and creates a Razorpay order.
+2. Razorpay Checkout opens in the browser, and the renter pays with a test card.
+3. On success, the browser calls a `verify` route, which checks the payment's signature and confirms the booking — mainly for fast UI feedback.
+4. Independently, Razorpay calls a **webhook** directly on the server for `payment.captured` / `payment.failed`. This is the actual source of truth: even if the renter closes the tab immediately after paying, the webhook alone confirms the booking.
+5. Every webhook handler is idempotent, so a duplicate or out-of-order delivery can never corrupt a booking's state — verified by deliberately blocking the `verify` call in the browser and confirming the webhook alone still closes the loop.
+
+<table>
+<tr>
+<td><img src="docs/screenshots/razorpay-checkout.png" width="260"><br/><sub>Razorpay Checkout (test mode)</sub></td>
+<td><img src="docs/screenshots/razorpay-success.png" width="260"><br/><sub>Test payment succeeded</sub></td>
+<td><img src="docs/screenshots/booking-confirmed.png" width="260"><br/><sub>Booking confirmed</sub></td>
+</tr>
+</table>
 
 ## Tech Stack
 
 **Frontend:** React, Vite, React Router, Axios, Context API, Tailwind CSS
 
 **Backend:** Node.js, Express, MongoDB, Mongoose
+
+**Payments:** Razorpay (test mode) — Checkout, signature verification, webhooks
 
 **Auth:** JWT, bcrypt, httpOnly cookies
 
