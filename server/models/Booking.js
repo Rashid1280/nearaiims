@@ -2,13 +2,11 @@ const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema(
   {
-    // the property being requested
     property: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Property",
       required: true,
     },
-    // the user making the request
     renter: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
