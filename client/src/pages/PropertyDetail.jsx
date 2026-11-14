@@ -10,6 +10,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { loadRazorpay } from "../utils/loadRazorpay";
+import AuthForm from "../components/AuthForm";
 
 const AMENITY_DISPLAY = {
   furnished: { label: "Furnished", Icon: Sofa },
@@ -27,6 +28,8 @@ function PropertyDetail() {
   const [submitting, setSubmitting] = useState(false);
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingError, setBookingError] = useState("");
+  const [showAuthForm, setShowAuthForm] = useState(false);
+  const [authMode, setAuthMode] = useState("login");
 
   const { user } = useAuth();
 
@@ -60,6 +63,11 @@ function PropertyDetail() {
 
   async function handleBookingSubmit(e) {
     e.preventDefault();
+    if (!user) {
+      setAuthMode("login");
+      setShowAuthForm(true);
+      return;
+    }
     setBookingError("");
     setSubmitting(true);
 
@@ -139,6 +147,14 @@ function PropertyDetail() {
     setBookingError("");
   }
 
+  function handleAuthSuccess() {
+    setShowAuthForm(false);
+  }
+
+  function handleSwitchAuthMode() {
+    setAuthMode((mode) => (mode === "login" ? "register" : "login"));
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       <div className="lg:flex lg:gap-10">
@@ -189,9 +205,16 @@ function PropertyDetail() {
         </div>
 
         {/* ---- right column: booking form, fixed width, stays visible while scrolling ---- */}
-        {user && owner && user.id !== owner._id && (
+        {!(user && owner && user.id === owner._id) && (
           <div className="mt-8 lg:mt-0 lg:w-80 lg:shrink-0 border border-line rounded-lg p-6 h-fit lg:sticky lg:top-6">
-            {bookingStatus === "success" ? (
+            {showAuthForm ? (
+              <AuthForm
+                mode={authMode}
+                compact
+                onSwitchMode={handleSwitchAuthMode}
+                onSuccess={handleAuthSuccess}
+              />
+            ) : bookingStatus === "success" ? (
               <div className="text-center py-4">
                 <CheckCircle2 size={40} className="text-accent mx-auto" />
                 <h2 className="font-semibold text-ink text-lg mt-3">
@@ -205,7 +228,7 @@ function PropertyDetail() {
                   onClick={handleRequestAnother}
                   className="w-full px-5 py-2 rounded-md border border-line text-ink text-sm font-medium hover:bg-surface mt-5"
                 >
-                  Request another stay
+                  Book another stay
                 </button>
               </div>
             ) : (
