@@ -8,9 +8,11 @@ import {
   UtensilsCrossed,
   ParkingCircle,
   CheckCircle2,
+  LayoutDashboard,
 } from "lucide-react";
 import { loadRazorpay } from "../utils/loadRazorpay";
 import AuthForm from "../components/AuthForm";
+import { Link } from "react-router-dom";
 
 const AMENITY_DISPLAY = {
   furnished: { label: "Furnished", Icon: Sofa },
@@ -205,7 +207,24 @@ function PropertyDetail() {
         </div>
 
         {/* ---- right column: booking form, fixed width, stays visible while scrolling ---- */}
-        {!(user && owner && user.id === owner._id) && (
+        {user && owner && user.id === owner._id ? (
+          <div className="mt-8 lg:mt-0 lg:w-80 lg:shrink-0 border border-line rounded-lg p-6 h-fit lg:sticky lg:top-6 text-center">
+            <LayoutDashboard size={40} className="text-brand mx-auto" />
+            <h2 className="font-semibold text-ink text-lg mt-3">
+              This is your listing
+            </h2>
+            <p className="text-sm text-muted mt-2">
+              You can&apos;t book your own property. Manage pricing,
+              availability, and bookings from your dashboard.
+            </p>
+            <Link
+              to="/dashboard"
+              className="block w-full px-5 py-2 rounded-md bg-accent text-white text-sm font-medium hover:opacity-90 mt-5"
+            >
+              Go to My Dashboard
+            </Link>
+          </div>
+        ) : (
           <div className="mt-8 lg:mt-0 lg:w-80 lg:shrink-0 border border-line rounded-lg p-6 h-fit lg:sticky lg:top-6">
             {showAuthForm ? (
               <AuthForm
