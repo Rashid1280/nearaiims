@@ -13,6 +13,8 @@ import {
 import { loadRazorpay } from "../utils/loadRazorpay";
 import AuthForm from "../components/AuthForm";
 import { Link } from "react-router-dom";
+import { DayPicker } from "@daypicker/react";
+import "@daypicker/react/style.css";
 
 const AMENITY_DISPLAY = {
   furnished: { label: "Furnished", Icon: Sofa },
@@ -21,17 +23,26 @@ const AMENITY_DISPLAY = {
   parking: { label: "Parking", Icon: ParkingCircle },
 };
 
+//takes dates from range and return a string
+function toApiDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function PropertyDetail() {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
 
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authMode, setAuthMode] = useState("login");
+  const [range, setRange] = useState();
+  const startDate = range?.from ? toApiDateString(range.from) : "";
+  const endDate = range?.to ? toApiDateString(range.to) : "";
 
   const { user } = useAuth();
 
@@ -65,6 +76,15 @@ function PropertyDetail() {
 
   async function handleBookingSubmit(e) {
     e.preventDefault();
+    if (
+      !range?.from ||
+      !range?.to ||
+      range.from.getTime() === range.to.getTime()
+    ) {
+      setBookingError("Please select both a check-in and check-out date.");
+      setBookingStatus("error");
+      return;
+    }
     if (!user) {
       setAuthMode("login");
       setShowAuthForm(true);
@@ -131,8 +151,7 @@ function PropertyDetail() {
         razorpay_signature: response.razorpay_signature,
       });
       setBookingStatus("success");
-      setStartDate("");
-      setEndDate("");
+      setRange(undefined);
     } catch {
       setBookingError(
         "Your payment went through, but we could not confirm the booking yet. Please check My Bookings in a minute.",
@@ -254,27 +273,7 @@ function PropertyDetail() {
               <form onSubmit={handleBookingSubmit}>
                 <h2 className="font-semibold text-ink mb-4">Book this stay</h2>
 
-                <label className="block mb-4">
-                  <span className="text-sm text-muted">Check-in</span>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                    className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
-                  />
-                </label>
-
-                <label className="block mb-4">
-                  <span className="text-sm text-muted">Check-out</span>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
-                    className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
-                  />
-                </label>
+                <DayPicker mode="range" selected={range} onSelect={setRange} />
 
                 <button
                   type="submit"
