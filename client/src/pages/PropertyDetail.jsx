@@ -30,6 +30,11 @@ function toApiDateString(date) {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
+//opposite of toApiDateString because calendar library needs real Date objects to know which days to grey out
+function parseApiDate(isoString) {
+  const [year, month, day] = isoString.slice(0, 10).split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
 
 function PropertyDetail() {
   const { id } = useParams();
@@ -41,6 +46,7 @@ function PropertyDetail() {
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authMode, setAuthMode] = useState("login");
   const [range, setRange] = useState();
+  const [bookedRanges, setBookedRanges] = useState([]);
   const startDate = range?.from ? toApiDateString(range.from) : "";
   const endDate = range?.to ? toApiDateString(range.to) : "";
 
@@ -57,6 +63,19 @@ function PropertyDetail() {
     }
 
     fetchProperty();
+  }, [id]);
+
+  async function fetchAvailability() {
+    try {
+      const response = await api.get(`/api/properties/${id}/availability`);
+      setBookedRanges(response.data);
+    } catch (error) {
+      console.error("Failed to fetch availability:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchAvailability();
   }, [id]);
 
   if (!property) {
@@ -152,6 +171,7 @@ function PropertyDetail() {
       });
       setBookingStatus("success");
       setRange(undefined);
+      fetchAvailability();
     } catch {
       setBookingError(
         "Your payment went through, but we could not confirm the booking yet. Please check My Bookings in a minute.",
@@ -175,6 +195,16 @@ function PropertyDetail() {
   function handleSwitchAuthMode() {
     setAuthMode((mode) => (mode === "login" ? "register" : "login"));
   }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const disabledRanges = bookedRanges.map((booked) => {
+    const from = parseApiDate(booked.startDate);
+    const to = parseApiDate(booked.endDate);
+    to.setDate(to.getDate() - 1);
+    return { from, to };
+  });
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -273,8 +303,16 @@ function PropertyDetail() {
               <form onSubmit={handleBookingSubmit}>
                 <h2 className="font-semibold text-ink mb-4">Book this stay</h2>
 
-                <DayPicker mode="range" selected={range} onSelect={setRange} />
-
+                <DayPicker
+                  mode="range"
+                  selected={range}
+                  onSelect={setRange}
+                  disabled={[{ before: today }, ...disabledRanges]}
+                  classNames={{
+                    disabled:
+                      "text-muted/30 line-through bg-surface cursor-not-allowed",
+                  }}
+                />
                 <button
                   type="submit"
                   disabled={submitting}
