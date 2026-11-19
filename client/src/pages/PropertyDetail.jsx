@@ -13,6 +13,8 @@ import {
 import { loadRazorpay } from "../utils/loadRazorpay";
 import AuthForm from "../components/AuthForm";
 import { Link } from "react-router-dom";
+import { DayPicker } from "@daypicker/react";
+import "@daypicker/react/style.css";
 
 const AMENITY_DISPLAY = {
   furnished: { label: "Furnished", Icon: Sofa },
@@ -21,17 +23,45 @@ const AMENITY_DISPLAY = {
   parking: { label: "Parking", Icon: ParkingCircle },
 };
 
+//takes dates from range and return a string
+function toApiDateString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+//opposite of toApiDateString because calendar library needs real Date objects to know which days to grey out
+function parseApiDate(isoString) {
+  const [year, month, day] = isoString.slice(0, 10).split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function countNights(from, to) {
+  const msPerDay = 1000 * 60 * 60 * 24;
+  return Math.round((to.getTime() - from.getTime()) / msPerDay);
+}
+// turns a Date object into a readable string for display, e.g. "10 Dec 2026"
+function formatDisplayDate(date) {
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
 function PropertyDetail() {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
 
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [bookingStatus, setBookingStatus] = useState("");
   const [bookingError, setBookingError] = useState("");
   const [showAuthForm, setShowAuthForm] = useState(false);
   const [authMode, setAuthMode] = useState("login");
+  const [range, setRange] = useState();
+  const [bookedRanges, setBookedRanges] = useState([]);
+  const startDate = range?.from ? toApiDateString(range.from) : "";
+  const endDate = range?.to ? toApiDateString(range.to) : "";
 
   const { user } = useAuth();
 
@@ -46,6 +76,19 @@ function PropertyDetail() {
     }
 
     fetchProperty();
+  }, [id]);
+
+  async function fetchAvailability() {
+    try {
+      const response = await api.get(`/api/properties/${id}/availability`);
+      setBookedRanges(response.data);
+    } catch (error) {
+      console.error("Failed to fetch availability:", error);
+    }
+  }
+
+  useEffect(() => {
+    fetchAvailability();
   }, [id]);
 
   if (!property) {
@@ -63,8 +106,23 @@ function PropertyDetail() {
     amenities,
   } = property;
 
+  const nights =
+    range?.from && range?.to && range.from.getTime() !== range.to.getTime()
+      ? countNights(range.from, range.to)
+      : 0;
+  const estimatedTotal = nights * pricePerNight;
+
   async function handleBookingSubmit(e) {
     e.preventDefault();
+    if (
+      !range?.from ||
+      !range?.to ||
+      range.from.getTime() === range.to.getTime()
+    ) {
+      setBookingError("Please select both a check-in and check-out date.");
+      setBookingStatus("error");
+      return;
+    }
     if (!user) {
       setAuthMode("login");
       setShowAuthForm(true);
@@ -131,8 +189,8 @@ function PropertyDetail() {
         razorpay_signature: response.razorpay_signature,
       });
       setBookingStatus("success");
-      setStartDate("");
-      setEndDate("");
+      setRange(undefined);
+      fetchAvailability();
     } catch {
       setBookingError(
         "Your payment went through, but we could not confirm the booking yet. Please check My Bookings in a minute.",
@@ -156,6 +214,33 @@ function PropertyDetail() {
   function handleSwitchAuthMode() {
     setAuthMode((mode) => (mode === "login" ? "register" : "login"));
   }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const disabledRanges = bookedRanges.map((booked) => {
+    const from = parseApiDate(booked.startDate);
+    const to = parseApiDate(booked.endDate);
+    to.setDate(to.getDate() - 1);
+    return { from, to };
+  });
+
+  const hasOnlyCheckIn =
+    range?.from && (!range?.to || range.from.getTime() === range.to.getTime());
+
+  let checkoutBlock = null;
+  if (hasOnlyCheckIn) {
+    const upcomingStarts = bookedRanges
+      .map((booked) => parseApiDate(booked.startDate))
+      .filter((start) => start > range.from)
+      .sort((a, b) => a - b);
+    if (upcomingStarts.length > 0) {
+      checkoutBlock = { after: upcomingStarts[0] };
+    }
+  }
+  const allDisabled = checkoutBlock
+    ? [{ before: today }, ...disabledRanges, checkoutBlock]
+    : [{ before: today }, ...disabledRanges];
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -253,28 +338,44 @@ function PropertyDetail() {
             ) : (
               <form onSubmit={handleBookingSubmit}>
                 <h2 className="font-semibold text-ink mb-4">Book this stay</h2>
-
-                <label className="block mb-4">
-                  <span className="text-sm text-muted">Check-in</span>
-                  <input
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    required
-                    className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
-                  />
-                </label>
-
-                <label className="block mb-4">
-                  <span className="text-sm text-muted">Check-out</span>
-                  <input
-                    type="date"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    required
-                    className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
-                  />
-                </label>
+                <div className="flex border border-line rounded-md mb-4 overflow-hidden">
+                  <div className="flex-1 px-3 py-2 border-r border-line">
+                    <div className="text-xs font-medium text-muted uppercase tracking-wide">
+                      Check-in
+                    </div>
+                    <div className="text-sm text-ink mt-0.5">
+                      {range?.from ? formatDisplayDate(range.from) : "Add date"}
+                    </div>
+                  </div>
+                  <div className="flex-1 px-3 py-2">
+                    <div className="text-xs font-medium text-muted uppercase tracking-wide">
+                      Check-out
+                    </div>
+                    <div className="text-sm text-ink mt-0.5">
+                      {range?.to && range.from.getTime() !== range.to.getTime()
+                        ? formatDisplayDate(range.to)
+                        : "Add date"}
+                    </div>
+                  </div>
+                </div>
+                {nights > 0 && (
+                  <p className="text-sm text-ink mb-4">
+                    ₹{pricePerNight} × {nights}{" "}
+                    {nights === 1 ? "night" : "nights"} ={" "}
+                    <span className="font-semibold">₹{estimatedTotal}</span>
+                  </p>
+                )}
+                <DayPicker
+                  mode="range"
+                  selected={range}
+                  onSelect={setRange}
+                  excludeDisabled
+                  disabled={allDisabled}
+                  classNames={{
+                    disabled:
+                      "text-muted/30 line-through bg-surface cursor-not-allowed",
+                  }}
+                />
 
                 <button
                   type="submit"

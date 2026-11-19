@@ -4,6 +4,8 @@ const { requireAuth } = require("../middleware/auth");
 const upload = require("../middleware/upload");
 const AppError = require("../utils/AppError");
 const jwt = require("jsonwebtoken");
+const Booking = require("../models/Booking");
+const { todayInIndia } = require("../utils/pricing");
 
 const router = express.Router();
 
@@ -137,6 +139,26 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
 
     await property.deleteOne();
     res.status(200).json({ message: "Property deleted" });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// READ — confirmed booking date ranges for one property, for the calendar (public)
+router.get("/:id/availability", async (req, res, next) => {
+  try {
+    const today = todayInIndia();
+    const oneYearFromNow = new Date(today);
+    oneYearFromNow.setUTCFullYear(oneYearFromNow.getUTCFullYear() + 1);
+
+    const bookedRanges = await Booking.find({
+      property: req.params.id,
+      status: "confirmed",
+      endDate: { $gt: today },
+      startDate: { $lt: oneYearFromNow },
+    }).select("startDate endDate -_id");
+
+    res.status(200).json(bookedRanges);
   } catch (error) {
     next(error);
   }
