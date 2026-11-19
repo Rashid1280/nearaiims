@@ -36,6 +36,11 @@ function parseApiDate(isoString) {
   return new Date(year, month - 1, day);
 }
 
+function countNights(from, to) {
+  const msPerDay = 1000 * 60 * 60 * 24;
+  return Math.round((to.getTime() - from.getTime()) / msPerDay);
+}
+
 function PropertyDetail() {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
@@ -92,6 +97,12 @@ function PropertyDetail() {
     owner,
     amenities,
   } = property;
+
+  const nights =
+    range?.from && range?.to && range.from.getTime() !== range.to.getTime()
+      ? countNights(range.from, range.to)
+      : 0;
+  const estimatedTotal = nights * pricePerNight;
 
   async function handleBookingSubmit(e) {
     e.preventDefault();
@@ -206,6 +217,23 @@ function PropertyDetail() {
     return { from, to };
   });
 
+  const hasOnlyCheckIn =
+    range?.from && (!range?.to || range.from.getTime() === range.to.getTime());
+
+  let checkoutBlock = null;
+  if (hasOnlyCheckIn) {
+    const upcomingStarts = bookedRanges
+      .map((booked) => parseApiDate(booked.startDate))
+      .filter((start) => start > range.from)
+      .sort((a, b) => a - b);
+    if (upcomingStarts.length > 0) {
+      checkoutBlock = { after: upcomingStarts[0] };
+    }
+  }
+  const allDisabled = checkoutBlock
+    ? [{ before: today }, ...disabledRanges, checkoutBlock]
+    : [{ before: today }, ...disabledRanges];
+
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
       <div className="lg:flex lg:gap-10">
@@ -302,17 +330,25 @@ function PropertyDetail() {
             ) : (
               <form onSubmit={handleBookingSubmit}>
                 <h2 className="font-semibold text-ink mb-4">Book this stay</h2>
-
                 <DayPicker
                   mode="range"
                   selected={range}
                   onSelect={setRange}
-                  disabled={[{ before: today }, ...disabledRanges]}
+                  excludeDisabled
+                  disabled={allDisabled}
                   classNames={{
                     disabled:
                       "text-muted/30 line-through bg-surface cursor-not-allowed",
                   }}
                 />
+
+                {nights > 0 && (
+                  <p className="text-sm text-ink mb-4">
+                    ₹{pricePerNight} × {nights}{" "}
+                    {nights === 1 ? "night" : "nights"} ={" "}
+                    <span className="font-semibold">₹{estimatedTotal}</span>
+                  </p>
+                )}
                 <button
                   type="submit"
                   disabled={submitting}
