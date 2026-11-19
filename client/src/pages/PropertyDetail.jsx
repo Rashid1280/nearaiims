@@ -40,6 +40,14 @@ function countNights(from, to) {
   const msPerDay = 1000 * 60 * 60 * 24;
   return Math.round((to.getTime() - from.getTime()) / msPerDay);
 }
+// turns a Date object into a readable string for display, e.g. "10 Dec 2026"
+function formatDisplayDate(date) {
+  return date.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
 
 function PropertyDetail() {
   const { id } = useParams();
@@ -330,6 +338,33 @@ function PropertyDetail() {
             ) : (
               <form onSubmit={handleBookingSubmit}>
                 <h2 className="font-semibold text-ink mb-4">Book this stay</h2>
+                <div className="flex border border-line rounded-md mb-4 overflow-hidden">
+                  <div className="flex-1 px-3 py-2 border-r border-line">
+                    <div className="text-xs font-medium text-muted uppercase tracking-wide">
+                      Check-in
+                    </div>
+                    <div className="text-sm text-ink mt-0.5">
+                      {range?.from ? formatDisplayDate(range.from) : "Add date"}
+                    </div>
+                  </div>
+                  <div className="flex-1 px-3 py-2">
+                    <div className="text-xs font-medium text-muted uppercase tracking-wide">
+                      Check-out
+                    </div>
+                    <div className="text-sm text-ink mt-0.5">
+                      {range?.to && range.from.getTime() !== range.to.getTime()
+                        ? formatDisplayDate(range.to)
+                        : "Add date"}
+                    </div>
+                  </div>
+                </div>
+                {nights > 0 && (
+                  <p className="text-sm text-ink mb-4">
+                    ₹{pricePerNight} × {nights}{" "}
+                    {nights === 1 ? "night" : "nights"} ={" "}
+                    <span className="font-semibold">₹{estimatedTotal}</span>
+                  </p>
+                )}
                 <DayPicker
                   mode="range"
                   selected={range}
@@ -342,13 +377,6 @@ function PropertyDetail() {
                   }}
                 />
 
-                {nights > 0 && (
-                  <p className="text-sm text-ink mb-4">
-                    ₹{pricePerNight} × {nights}{" "}
-                    {nights === 1 ? "night" : "nights"} ={" "}
-                    <span className="font-semibold">₹{estimatedTotal}</span>
-                  </p>
-                )}
                 <button
                   type="submit"
                   disabled={submitting}
