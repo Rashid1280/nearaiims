@@ -188,9 +188,9 @@ function PropertyDetail() {
         razorpay_payment_id: response.razorpay_payment_id,
         razorpay_signature: response.razorpay_signature,
       });
+      await fetchAvailability();
       setBookingStatus("success");
       setRange(undefined);
-      fetchAvailability();
     } catch {
       setBookingError(
         "Your payment went through, but we could not confirm the booking yet. Please check My Bookings in a minute.",
