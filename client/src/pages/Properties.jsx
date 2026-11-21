@@ -33,6 +33,7 @@ function Properties() {
 
   // runs once on page load only - no filter yet so all properties shows at once
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProperties();
   }, []);
 
