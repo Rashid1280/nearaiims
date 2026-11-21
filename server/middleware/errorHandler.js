@@ -17,6 +17,11 @@ function errorHandler(err, req, res, next) {
     return res.status(409).json({ message: "Duplicate value entered" });
   }
 
+  // broken JSON in the request body (thrown by express.json)
+  if (err.type === "entity.parse.failed") {
+    return res.status(400).json({ message: "Invalid JSON in request body" });
+  }
+
   // errors we threw ourselves on purpose already know their own status code
   if (err.isOperational) {
     return res.status(err.statusCode).json({ message: err.message });
