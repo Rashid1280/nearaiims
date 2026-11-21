@@ -73,28 +73,31 @@ router.get("/mine", requireAuth, async (req, res, next) => {
   }
 });
 
-// READ — one property, public, with owner's info populated
 router.get("/:id", async (req, res, next) => {
-  const property = await Property.findById(req.params.id)
-    .populate("owner", "name")
-    .lean();
-  if (!property) return next(new AppError("Property not found", 404));
+  try {
+    const property = await Property.findById(req.params.id)
+      .populate("owner", "name")
+      .lean();
+    if (!property) return next(new AppError("Property not found", 404));
 
-  let isOwner = false;
-  const token = req.cookies.token;
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      isOwner = String(property.owner._id) === String(decoded.id);
-    } catch {
-      // bad/expired token - treat as anonymous - isOwner check because editProperty also calls this endpoint to edit property to prefill the input of contact number
+    let isOwner = false;
+    const token = req.cookies.token;
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        isOwner = String(property.owner._id) === String(decoded.id);
+      } catch {
+        // bad/expired token - treat as anonymous - isOwner check because editProperty also calls this endpoint to edit property to prefill the input of contact number
+      }
     }
-  }
 
-  if (!isOwner) {
-    delete property.ownerContactNumber;
+    if (!isOwner) {
+      delete property.ownerContactNumber;
+    }
+    res.status(200).json(property);
+  } catch (error) {
+    next(error);
   }
-  res.status(200).json(property);
 });
 
 // UPDATE — must be logged in AND must own this specific property
