@@ -1,16 +1,15 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { useState } from "react";
+import { Routes, Route, Link, useNavigate } from "react-router-dom";
+import { Menu, X } from "lucide-react";
+import api from "./api/axios.js";
 import { useAuth } from "./context/AuthContext.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Home from "./pages/Home.jsx";
 import Properties from "./pages/Properties.jsx";
+import PropertyDetail from "./pages/PropertyDetail.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
-import api from "./api/axios.js";
-import { Menu, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import PropertyDetail from "./pages/PropertyDetail.jsx";
 import OwnerDashboard from "./pages/OwnerDashboard.jsx";
-import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import { useState } from "react";
 import AddProperty from "./pages/AddProperty.jsx";
 import EditProperty from "./pages/EditProperty.jsx";
 
