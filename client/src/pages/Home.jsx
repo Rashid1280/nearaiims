@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "../assets/hero.webp";
+import { PROPERTY_TYPES } from "../constants/propertyTypes";
 
 function Home() {
   const navigate = useNavigate();
@@ -53,13 +54,11 @@ function Home() {
               className="border border-line rounded-md px-3 py-2 text-sm"
             >
               <option value="">Any type</option>
-              <option value="Room">Room</option>
-              <option value="1 RK">1 RK</option>
-              <option value="1 BHK">1 BHK</option>
-              <option value="2 BHK">2 BHK</option>
-              <option value="3 BHK">3 BHK</option>
-              <option value="Independent House">Independent House</option>
-              <option value="PG">PG</option>
+              {PROPERTY_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
             </select>
 
             <div className="flex gap-3">

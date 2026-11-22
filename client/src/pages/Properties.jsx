@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api/axios";
 import PropertyCard from "../components/PropertyCard.jsx";
 import { useSearchParams } from "react-router-dom";
+import { PROPERTY_TYPES } from "../constants/propertyTypes";
 
 function Properties() {
   const [searchParams] = useSearchParams();
@@ -60,13 +61,11 @@ function Properties() {
           className="border border-line rounded-md px-3 py-2 text-sm"
         >
           <option value="">Any type</option>
-          <option value="Room">Room</option>
-          <option value="1 RK">1 RK</option>
-          <option value="1 BHK">1 BHK</option>
-          <option value="2 BHK">2 BHK</option>
-          <option value="3 BHK">3 BHK</option>
-          <option value="Independent House">Independent House</option>
-          <option value="PG">PG</option>
+          {PROPERTY_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
+          ))}
         </select>
 
         <input

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext.jsx";
+import { PROPERTY_TYPES } from "../constants/propertyTypes";
 
 const AMENITIES = ["furnished", "ac", "kitchenAccess", "parking"];
 
@@ -129,13 +130,11 @@ function EditProperty() {
             className="w-full border border-line rounded-md px-3 py-2 text-sm mt-1"
           >
             <option value="">Select type</option>
-            <option value="Room">Room</option>
-            <option value="1 RK">1 RK</option>
-            <option value="1 BHK">1 BHK</option>
-            <option value="2 BHK">2 BHK</option>
-            <option value="3 BHK">3 BHK</option>
-            <option value="Independent House">Independent House</option>
-            <option value="PG">PG</option>
+            {PROPERTY_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
           </select>
         </label>
 
