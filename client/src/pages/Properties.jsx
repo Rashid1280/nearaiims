@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import api from "../api/axios";
-import PropertyCard from "../PropertyCard.jsx";
+import PropertyCard from "../components/PropertyCard.jsx";
 import { useSearchParams } from "react-router-dom";
 
 function Properties() {
