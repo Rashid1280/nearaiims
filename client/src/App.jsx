@@ -125,8 +125,7 @@ function App() {
           path="/dashboard"
           element={
             <ProtectedRoute>
-              {" "}
-              <OwnerDashboard />{" "}
+              <OwnerDashboard />
             </ProtectedRoute>
           }
         />
