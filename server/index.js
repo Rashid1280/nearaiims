@@ -31,8 +31,6 @@ app.use("/api/payments", paymentRoutes);
 
 const PORT = process.env.PORT || 5000;
 
-connectDB();
-
 app.get("/", (req, res) => {
   res.send(`NearAIIMS API is running`);
 });
@@ -40,7 +38,8 @@ app.get("/", (req, res) => {
 // error handler is always placed in last after every route
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server is running at port ${PORT}`);
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server is running at port ${PORT}`);
+  });
 });
-//Auto-deploy test 2
