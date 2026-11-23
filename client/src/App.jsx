@@ -12,6 +12,7 @@ import Register from "./pages/Register.jsx";
 import OwnerDashboard from "./pages/OwnerDashboard.jsx";
 import AddProperty from "./pages/AddProperty.jsx";
 import EditProperty from "./pages/EditProperty.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 function App() {
   const { user, setUser, loading } = useAuth();
@@ -145,6 +146,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </div>
   );
