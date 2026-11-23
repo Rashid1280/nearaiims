@@ -8,6 +8,8 @@ function Properties() {
   const [searchParams] = useSearchParams();
 
   const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [location, setLocation] = useState(searchParams.get("location") || "");
   const [propertyType, setPropertyType] = useState(
@@ -18,6 +20,8 @@ function Properties() {
 
   // builds the filter object and asks the backend for matching properties
   async function fetchProperties() {
+    setLoading(true);
+    setError("");
     const params = {};
     if (location) params.location = location;
     if (propertyType) params.propertyType = propertyType;
@@ -29,6 +33,9 @@ function Properties() {
       setProperties(response.data);
     } catch (error) {
       console.error("Failed to fetch properties:", error);
+      setError("Could not load properties. Please try again.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -91,11 +98,21 @@ function Properties() {
         </button>
       </form>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {properties.map((property) => (
-          <PropertyCard key={property._id} property={property} />
-        ))}
-      </div>
+      {loading ? (
+        <p className="text-center text-muted mt-12">Loading properties...</p>
+      ) : error ? (
+        <p className="text-center text-danger mt-12">{error}</p>
+      ) : properties.length === 0 ? (
+        <p className="text-center text-muted mt-12">
+          No properties found. Try changing your filters.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {properties.map((property) => (
+            <PropertyCard key={property._id} property={property} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
