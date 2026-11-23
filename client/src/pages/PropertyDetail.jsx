@@ -202,8 +202,8 @@ function PropertyDetail() {
     }
   }
 
-  // brings the form back after a successful request
-  function handleRequestAnother() {
+  //brings the form back after a successful booking
+  function handleBookAnother() {
     setBookingStatus("");
     setBookingError("");
   }
@@ -330,7 +330,7 @@ function PropertyDetail() {
                   Bookings.
                 </p>
                 <button
-                  onClick={handleRequestAnother}
+                  onClick={handleBookAnother}
                   className="w-full px-5 py-2 rounded-md border border-line text-ink text-sm font-medium hover:bg-surface mt-5"
                 >
                   Book another stay

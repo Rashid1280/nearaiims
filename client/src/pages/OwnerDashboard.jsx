@@ -32,7 +32,7 @@ function OwnerDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("received");
 
-  // ---- Requests Received ----
+  // ---- Bookings Received ----
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -323,7 +323,7 @@ function OwnerDashboard() {
         </section>
       )}
 
-      {/* ---------------- Requests Received ---------------- */}
+      {/* ---------------- Bookings Received ---------------- */}
       {activeTab === "received" && (
         <section className="mt-6">
           {loading ? (
@@ -366,7 +366,7 @@ function OwnerDashboard() {
                       </>
                     ) : (
                       <p className="text-sm text-muted">
-                        Requested by: {booking.renter.name} — this listing has
+                        Booked by: {booking.renter.name} — this listing has
                         since been deleted.
                       </p>
                     )}
@@ -385,7 +385,7 @@ function OwnerDashboard() {
             <p className="text-muted mt-4">Loading your bookings...</p>
           ) : myBookings.length === 0 ? (
             <p className="text-muted mt-4">
-              You haven't requested any bookings yet.{" "}
+              You haven't booked any stays yet.{" "}
               <Link to="/properties" className="text-brand underline">
                 Browse properties
               </Link>
