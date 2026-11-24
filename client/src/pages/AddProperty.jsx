@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
-import { PROPERTY_TYPES } from "../constants/propertyTypes";
+import { PROPERTY_TYPES } from "../constants";
 
 const AMENITIES = ["furnished", "ac", "kitchenAccess", "parking"];
 

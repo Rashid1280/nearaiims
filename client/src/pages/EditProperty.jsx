@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext.jsx";
-import { PROPERTY_TYPES } from "../constants/propertyTypes";
+import { PROPERTY_TYPES } from "../constants";
 
 const AMENITIES = ["furnished", "ac", "kitchenAccess", "parking"];
 

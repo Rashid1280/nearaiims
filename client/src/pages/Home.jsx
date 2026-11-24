@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import heroImage from "../assets/hero.webp";
-import { PROPERTY_TYPES } from "../constants/propertyTypes";
+import { PROPERTY_TYPES } from "../constants";
 
 function Home() {
   const navigate = useNavigate();

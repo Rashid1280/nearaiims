@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api/axios";
 import PropertyCard from "../components/PropertyCard.jsx";
 import { useSearchParams } from "react-router-dom";
-import { PROPERTY_TYPES } from "../constants/propertyTypes";
+import { PROPERTY_TYPES } from "../constants";
 
 function Properties() {
   const [searchParams] = useSearchParams();
