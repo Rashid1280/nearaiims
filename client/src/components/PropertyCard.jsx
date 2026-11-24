@@ -1,11 +1,5 @@
 import { Link } from "react-router-dom";
-
-const AMENITY_LABELS = {
-  furnished: "Furnished",
-  ac: "AC",
-  kitchenAccess: "Kitchen access",
-  parking: "Parking",
-};
+import { AMENITIES } from "../constants";
 
 function PropertyCard({ property }) {
   if (!property) return null;
@@ -45,7 +39,7 @@ function PropertyCard({ property }) {
                   key={amenity}
                   className="text-xs px-2 py-0.5 rounded-full bg-surface text-muted border border-line"
                 >
-                  {AMENITY_LABELS[amenity] || amenity}
+                  {AMENITIES[amenity]?.label || amenity}
                 </span>
               ))}
             </div>
