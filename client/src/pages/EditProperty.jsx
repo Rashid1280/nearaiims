@@ -2,9 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext.jsx";
-import { PROPERTY_TYPES } from "../constants";
-
-const AMENITIES = ["furnished", "ac", "kitchenAccess", "parking"];
+import { PROPERTY_TYPES, AMENITIES } from "../constants";
 
 function EditProperty() {
   const { id } = useParams();
@@ -199,17 +197,17 @@ function EditProperty() {
         <div>
           <span className="text-sm text-muted">Amenities</span>
           <div className="flex flex-wrap gap-4 mt-2">
-            {AMENITIES.map((amenity) => (
+            {Object.entries(AMENITIES).map(([value, { label }]) => (
               <label
-                key={amenity}
+                key={value}
                 className="flex items-center gap-2 text-sm text-ink"
               >
                 <input
                   type="checkbox"
-                  checked={amenities.includes(amenity)}
-                  onChange={() => toggleAmenity(amenity)}
+                  checked={amenities.includes(value)}
+                  onChange={() => toggleAmenity(value)}
                 />
-                {amenity}
+                {label}
               </label>
             ))}
           </div>
