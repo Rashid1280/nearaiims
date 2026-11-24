@@ -2,26 +2,13 @@ import { useState, useEffect } from "react";
 import api from "../api/axios";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import {
-  Sofa,
-  Snowflake,
-  UtensilsCrossed,
-  ParkingCircle,
-  CheckCircle2,
-  LayoutDashboard,
-} from "lucide-react";
+import { CheckCircle2, LayoutDashboard } from "lucide-react";
 import { loadRazorpay } from "../utils/loadRazorpay";
 import AuthForm from "../components/AuthForm";
 import { Link } from "react-router-dom";
 import { DayPicker } from "@daypicker/react";
 import "@daypicker/react/style.css";
-
-const AMENITY_DISPLAY = {
-  furnished: { label: "Furnished", Icon: Sofa },
-  ac: { label: "AC", Icon: Snowflake },
-  kitchenAccess: { label: "Kitchen access", Icon: UtensilsCrossed },
-  parking: { label: "Parking", Icon: ParkingCircle },
-};
+import { AMENITIES } from "../constants";
 
 //takes dates from range and return a string
 function toApiDateString(date) {
@@ -263,7 +250,7 @@ function PropertyDetail() {
               <h2 className="font-semibold text-ink mb-2">Amenities</h2>
               <div className="flex flex-wrap gap-3">
                 {amenities.map((amenity) => {
-                  const display = AMENITY_DISPLAY[amenity];
+                  const display = AMENITIES[amenity];
                   const Icon = display?.Icon;
                   return (
                     <span
