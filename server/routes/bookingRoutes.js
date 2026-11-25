@@ -9,10 +9,10 @@ const {
   parseDate,
   todayInIndia,
   toPaise,
+  PLATFORM_FEE_PERCENT,
 } = require("../utils/pricing");
 const Transaction = require("../models/Transaction");
 const { getKeyId, getRazorpay } = require("../config/razorpay");
-const PLATFORM_FEE_PERCENT = 10;
 
 const router = express.Router();
 

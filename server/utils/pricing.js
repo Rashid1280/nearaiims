@@ -1,3 +1,4 @@
+const PLATFORM_FEE_PERCENT = 10;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 function countNights(startDate, endDate) {
@@ -44,4 +45,5 @@ module.exports = {
   toPaise,
   parseDate,
   todayInIndia,
+  PLATFORM_FEE_PERCENT,
 };

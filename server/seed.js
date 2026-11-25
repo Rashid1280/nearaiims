@@ -6,10 +6,13 @@ const cloudinary = require("./config/cloudinary");
 const User = require("./models/User");
 const Property = require("./models/Property");
 const Booking = require("./models/Booking");
-const { calculateAmounts, countNights } = require("./utils/pricing");
+const {
+  calculateAmounts,
+  countNights,
+  PLATFORM_FEE_PERCENT,
+} = require("./utils/pricing");
 
 const SALT_ROUNDS = 10;
-const PLATFORM_FEE_PERCENT = 10; // keep equal to the one in bookingRoutes.js
 
 // picsum.photos generates a real random photo
 // async function uploadSeedImage(seedName) {
