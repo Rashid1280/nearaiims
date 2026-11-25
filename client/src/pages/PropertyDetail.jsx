@@ -47,6 +47,7 @@ function PropertyDetail() {
   const [authMode, setAuthMode] = useState("login");
   const [range, setRange] = useState();
   const [bookedRanges, setBookedRanges] = useState([]);
+  const [loadError, setLoadError] = useState("");
   const startDate = range?.from ? toApiDateString(range.from) : "";
   const endDate = range?.to ? toApiDateString(range.to) : "";
 
@@ -57,8 +58,15 @@ function PropertyDetail() {
       try {
         const response = await api.get(`/api/properties/${id}`);
         setProperty(response.data);
+        setLoadError("");
       } catch (error) {
         console.error("Failed to fetch property:", error);
+        const status = error.response?.status;
+        setLoadError(
+          status === 400 || status === 404
+            ? "This property could not be found."
+            : "Could not load this property. Please try again.",
+        );
       }
     }
 
@@ -78,6 +86,20 @@ function PropertyDetail() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAvailability();
   }, [id]);
+
+  if (loadError) {
+    return (
+      <div className="max-w-6xl mx-auto px-6 py-16 text-center">
+        <p className="text-muted">{loadError}</p>
+        <Link
+          to="/properties"
+          className="inline-block mt-4 px-5 py-2 rounded-md bg-brand text-white text-sm font-medium hover:bg-brand-dark"
+        >
+          Browse properties
+        </Link>
+      </div>
+    );
+  }
 
   if (!property) {
     return <p className="text-center text-muted mt-12">Loading...</p>;
